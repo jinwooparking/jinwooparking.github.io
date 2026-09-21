@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>3학년 4반 공지</title>
+<title>양현고 급식</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -85,7 +85,7 @@
   @keyframes blink { 50% { opacity: 0; } }
 
   .head {
-    padding: 26px 20px 6px;
+    padding: 26px 20px 10px;
   }
   .eyebrow {
     font-family: 'JetBrains Mono', monospace;
@@ -102,10 +102,47 @@
   .sub {
     color: var(--muted);
     font-size: 14px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
 
-  .feed { padding: 8px 12px 20px; }
+  .datenav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .navbtn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 11px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .navbtn:hover { background: var(--border); }
+  .navbtn:active { transform: translateY(1px); }
+  .navbtn.today {
+    color: var(--mint);
+    border-color: rgba(126,231,135,0.35);
+  }
+  .datelabel {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    text-align: center;
+  }
+  .datelabel .dow {
+    color: var(--amber);
+    margin-left: 4px;
+  }
+
+  .feed { padding: 8px 12px 20px; min-height: 120px; }
   .item {
     display: grid;
     grid-template-columns: 44px 1fr;
@@ -136,14 +173,46 @@
   .tag.due { background: rgba(255,123,156,0.15); color: var(--pink); }
   .tag.info { background: rgba(121,192,255,0.15); color: var(--blue); }
   .tag.ok { background: rgba(126,231,135,0.15); color: var(--mint); }
-  .msg { font-size: 15px; line-height: 1.55; }
+  .msg { font-size: 15px; line-height: 1.85; }
   .msg b { color: var(--amber); font-weight: 600; }
+  .dish-row { display: block; }
+  .allergy { color: var(--muted); font-size: 12px; }
   .meta {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     color: var(--muted);
-    margin-top: 6px;
+    margin-top: 8px;
   }
+
+  .state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .state .big { font-size: 26px; margin-bottom: 6px; }
+  .retrybtn {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--mint);
+    background: rgba(126,231,135,0.1);
+    border: 1px solid rgba(126,231,135,0.35);
+    border-radius: 6px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+
+  .legend {
+    padding: 14px 20px 4px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .legend b { color: var(--text); font-weight: 600; }
 
   .footer {
     text-align: center;
@@ -170,10 +239,13 @@
     70% { box-shadow: 0 0 0 6px rgba(126,231,135,0); }
     100% { box-shadow: 0 0 0 0 rgba(126,231,135,0); }
   }
+  .footer .src { display: block; margin-top: 4px; opacity: 0.7; }
 
   @media (max-width: 420px) {
     h1 { font-size: 22px; }
     .ln { padding-right: 6px; }
+    .datelabel { font-size: 12px; }
+    .navbtn { padding: 7px 9px; }
   }
 </style>
 </head>
@@ -184,46 +256,231 @@
         <div class="dots">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
         </div>
-        <span class="filename">공지<span class="ext">.html</span></span>
+        <span class="filename">급식<span class="ext">.html</span></span>
       </div>
 
       <div class="head">
-        <div class="eyebrow">3학년 4반</div>
-        <h1>이번 주 공지<span class="cursor"></span></h1>
-        <div class="sub">눌러서 접었다 펴는 기능은 없습니다 — 그냥 쭉 읽으시면 돼요</div>
+        <div class="eyebrow">양현고등학교</div>
+        <h1>오늘의 급식<span class="cursor"></span></h1>
+        <div class="sub" id="subline">나이스(NEIS) 급식 정보를 자동으로 불러옵니다</div>
+
+        <div class="datenav">
+          <button class="navbtn" id="prevBtn" type="button">&lsaquo; 이전</button>
+          <span class="datelabel" id="dateLabel">-</span>
+          <button class="navbtn today" id="todayBtn" type="button">오늘</button>
+          <button class="navbtn" id="nextBtn" type="button">다음 &rsaquo;</button>
+        </div>
       </div>
 
-      <div class="feed">
-        <div class="item">
-          <div class="ln">01</div>
-          <div class="content">
-            <span class="tag due">마감임박</span>
-            <div class="msg">수행평가 <b>수학 1~3단원</b> 범위 확인하세요.</div>
-            <div class="meta">수요일까지</div>
-          </div>
+      <div class="feed" id="feed">
+        <div class="state" id="stateBox">
+          <div class="big">⋯</div>
+          불러오는 중입니다
         </div>
-        <div class="item">
-          <div class="ln">02</div>
-          <div class="content">
-            <span class="tag info">준비물</span>
-            <div class="msg">체육복 <b>수요일</b>에 꼭 챙겨오기.</div>
-            <div class="meta">체육 2교시</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="ln">03</div>
-          <div class="content">
-            <span class="tag ok">제출</span>
-            <div class="msg">현장체험학습 신청서 <b>금요일까지</b> 담임 선생님께 제출.</div>
-            <div class="meta">늦으면 불참 처리</div>
-          </div>
-        </div>
+      </div>
+
+      <div class="legend">
+        <b>알레르기 표시</b> (요리명 옆 괄호 숫자) — 1.난류 2.우유 3.메밀 4.땅콩 5.대두 6.밀 7.고등어 8.게 9.새우 10.돼지고기 11.복숭아 12.토마토 13.아황산류 14.호두 15.닭고기 16.쇠고기 17.오징어 18.조개류(굴·전복·홍합 포함) 19.잣
       </div>
     </div>
 
     <div class="footer">
-      <span class="live">이 페이지는 계속 업데이트됩니다</span>
+      <span class="live">데이터 출처: 나이스(NEIS) 교육정보 개방 포털</span>
+      <span class="src">전북특별자치도교육청 · 양현고등학교 (SD_SCHUL_CODE 8321083)</span>
     </div>
   </div>
+
+<script>
+(function () {
+  // ── 학교 정보 (전북특별자치도교육청 양현고등학교) ─────────────────
+  var OFFICE_CODE = 'P10';
+  var SCHOOL_CODE = '8321083';
+
+  // 개인 인증키가 있다면 아래에 넣으세요. 비워두면 키 없이 요청합니다.
+  // 발급: https://open.neis.go.kr/portal/guide/actKeyPage.do
+  var NEIS_KEY = '';
+
+  // NEIS API가 브라우저 CORS를 허용하지 않아 공개 CORS 릴레이를 순서대로 시도합니다.
+  var CORS_PROXIES = [
+    function (url) { return url; }, // 직접 시도 (향후 CORS 허용 시를 대비)
+    function (url) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url); },
+    function (url) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url); },
+    function (url) { return 'https://corsproxy.io/?url=' + encodeURIComponent(url); }
+  ];
+
+  var MEAL_TAG_CLASS = { '1': 'info', '2': 'ok', '3': 'due' };
+  var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+
+  var feed = document.getElementById('feed');
+  var dateLabel = document.getElementById('dateLabel');
+  var subline = document.getElementById('subline');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var todayBtn = document.getElementById('todayBtn');
+
+  function todayKST() {
+    // 뷰어의 로컬 시간대와 무관하게 한국 표준시 기준 오늘 날짜를 구함
+    var parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    var y, m, d;
+    parts.forEach(function (p) {
+      if (p.type === 'year') y = p.value;
+      if (p.type === 'month') m = p.value;
+      if (p.type === 'day') d = p.value;
+    });
+    return new Date(Number(y), Number(m) - 1, Number(d));
+  }
+
+  var current = todayKST();
+
+  function ymd(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, '0');
+    var d = String(date.getDate()).padStart(2, '0');
+    return '' + y + m + d;
+  }
+
+  function fmtLabel(date) {
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
+    return y + '.' + String(m).padStart(2, '0') + '.' + String(d).padStart(2, '0');
+  }
+
+  function withTimeout(promise, ms) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, ms);
+    return { signal: controller.signal, clear: function () { clearTimeout(timer); } };
+  }
+
+  function fetchMeals(dateStr) {
+    var base = 'https://open.neis.go.kr/hub/mealServiceDietInfo';
+    var qs = '?Type=json&ATPT_OFCDC_SC_CODE=' + OFFICE_CODE +
+      '&SD_SCHUL_CODE=' + SCHOOL_CODE + '&MLSV_YMD=' + dateStr +
+      (NEIS_KEY ? '&KEY=' + encodeURIComponent(NEIS_KEY) : '');
+    var targetUrl = base + qs;
+
+    var attempt = 0;
+    function tryNext() {
+      if (attempt >= CORS_PROXIES.length) {
+        return Promise.reject(new Error('모든 경로에서 데이터를 가져오지 못했습니다.'));
+      }
+      var url = CORS_PROXIES[attempt](targetUrl);
+      attempt++;
+      var t = withTimeout(null, 7000);
+      return fetch(url, { signal: t.signal, cache: 'no-store' })
+        .then(function (res) {
+          t.clear();
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        })
+        .then(function (text) {
+          var json = JSON.parse(text);
+          return json;
+        })
+        .catch(function (err) {
+          t.clear();
+          return tryNext();
+        });
+    }
+    return tryNext();
+  }
+
+  function stripHtml(s) {
+    return s.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+  }
+
+  function renderDishes(ddishNm) {
+    var lines = stripHtml(ddishNm).split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    return lines.map(function (line) {
+      var withAllergy = line.replace(/\(([\d.\s]+)\)\s*$/, '<span class="allergy">($1)</span>');
+      return '<span class="dish-row">' + withAllergy + '</span>';
+    }).join('');
+  }
+
+  function renderMeals(rows) {
+    feed.innerHTML = '';
+    var order = { '1': 1, '2': 2, '3': 3 };
+    rows.sort(function (a, b) {
+      var oa = order.hasOwnProperty(a.MMEAL_SC_CODE) ? order[a.MMEAL_SC_CODE] : 9;
+      var ob = order.hasOwnProperty(b.MMEAL_SC_CODE) ? order[b.MMEAL_SC_CODE] : 9;
+      return oa - ob;
+    });
+
+    rows.forEach(function (row, i) {
+      var item = document.createElement('div');
+      item.className = 'item';
+
+      var tagClass = MEAL_TAG_CLASS[row.MMEAL_SC_CODE] || 'info';
+      var cal = row.CAL_INFO ? row.CAL_INFO.trim() : '';
+
+      item.innerHTML =
+        '<div class="ln">' + String(i + 1).padStart(2, '0') + '</div>' +
+        '<div class="content">' +
+          '<span class="tag ' + tagClass + '">' + row.MMEAL_SC_NM + '</span>' +
+          '<div class="msg">' + renderDishes(row.DDISH_NM || '') + '</div>' +
+          (cal ? '<div class="meta">' + cal + '</div>' : '') +
+        '</div>';
+      feed.appendChild(item);
+    });
+  }
+
+  function renderState(big, text, showRetry) {
+    feed.innerHTML =
+      '<div class="state">' +
+        '<div class="big">' + big + '</div>' +
+        text +
+        (showRetry ? '<div><button class="retrybtn" id="retryBtn" type="button">다시 시도</button></div>' : '') +
+      '</div>';
+    if (showRetry) {
+      document.getElementById('retryBtn').addEventListener('click', load);
+    }
+  }
+
+  function load() {
+    dateLabel.textContent = fmtLabel(current) + ' ' + DOW[current.getDay()] + '요일';
+    todayBtn.style.visibility = ymd(current) === ymd(todayKST()) ? 'hidden' : 'visible';
+    renderState('⋯', '불러오는 중입니다', false);
+    subline.textContent = '나이스(NEIS) 급식 정보를 자동으로 불러옵니다';
+
+    fetchMeals(ymd(current)).then(function (json) {
+      var body = json && json.mealServiceDietInfo;
+      if (!body) {
+        var code = json && json.RESULT && json.RESULT.CODE;
+        if (code === 'INFO-200') {
+          renderState('🍽️', '이 날은 급식 정보가 없습니다\n(주말 · 공휴일 · 방학 등)', false);
+        } else {
+          renderState('!', '데이터를 불러오지 못했습니다', true);
+        }
+        return;
+      }
+      var rows = body[1] && body[1].row ? body[1].row : [];
+      if (!rows.length) {
+        renderState('🍽️', '이 날은 급식 정보가 없습니다\n(주말 · 공휴일 · 방학 등)', false);
+        return;
+      }
+      renderMeals(rows);
+    }).catch(function () {
+      renderState('!', '데이터를 불러오지 못했습니다\n(네트워크 상태를 확인해 주세요)', true);
+    });
+  }
+
+  prevBtn.addEventListener('click', function () {
+    current = new Date(current.getFullYear(), current.getMonth(), current.getDate() - 1);
+    load();
+  });
+  nextBtn.addEventListener('click', function () {
+    current = new Date(current.getFullYear(), current.getMonth(), current.getDate() + 1);
+    load();
+  });
+  todayBtn.addEventListener('click', function () {
+    current = todayKST();
+    load();
+  });
+
+  load();
+})();
+</script>
 </body>
 </html>
