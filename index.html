@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>양현고 급식</title>
+<title>양현고 급식 · 시간표</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -55,34 +55,98 @@
     overflow: hidden;
     box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
   }
+
+  /* ── 사파리 스타일 탭바 (iOS 알약형 탭) ───────────────────── */
   .tabbar {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 10px;
+    padding: 10px 12px;
     background: var(--panel-2);
     border-bottom: 1px solid var(--border);
   }
-  .dots { display: flex; gap: 6px; margin-right: 6px; }
+  .dots {
+    display: flex;
+    gap: 6px;
+    margin: 0 2px 0 4px;
+    flex-shrink: 0;
+  }
   .dot { width: 10px; height: 10px; border-radius: 50%; }
   .dot.r { background: #ff5f56; }
   .dot.y { background: #ffbd2e; }
   .dot.g { background: #27c93f; }
-  .filename {
+
+  .tabstrip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabstrip::-webkit-scrollbar { display: none; }
+
+  .tabchip {
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--muted);
+    background: rgba(127,127,127,0.14);
+    border: 1px solid transparent;
+    border-radius: 9px;
+    padding: 6.5px 13px;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   }
-  .filename .ext { color: var(--amber); }
-  .cursor {
-    display: inline-block;
-    width: 7px; height: 15px;
-    background: var(--mint);
-    margin-left: 6px;
-    vertical-align: text-bottom;
-    animation: blink 1.1s step-end infinite;
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .tabchip { background: rgba(0,0,0,0.05); }
   }
-  @keyframes blink { 50% { opacity: 0; } }
+  .tabchip .favdot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--muted);
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+  }
+  .tabchip#tabBtnSchedule .favdot { background: var(--mint); }
+  .tabchip#tabBtnMeal .favdot { background: var(--blue); }
+  .tabchip .ext { color: var(--amber); opacity: 0.5; transition: opacity 0.15s ease; }
+  .tabchip:hover:not(.active) { color: var(--text); background: rgba(127,127,127,0.2); }
+  .tabchip.active {
+    background: var(--panel);
+    border-color: var(--border);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .tabchip.active .ext { opacity: 1; }
+  .tabchip.active .favdot { opacity: 1; }
+
+  /* ── 슬라이드 전환 패널 ───────────────────────────────── */
+  .tabpanes-viewport {
+    position: relative;
+    overflow: hidden;
+    transition: height 0.4s cubic-bezier(0.65,0,0.35,1);
+  }
+  .tabpanes-track {
+    display: flex;
+    width: 200%;
+    transition: transform 0.4s cubic-bezier(0.65,0,0.35,1);
+  }
+  .pane {
+    width: 50%;
+    flex-shrink: 0;
+    min-width: 0;
+    opacity: 0.35;
+    transition: opacity 0.35s ease;
+  }
+  .pane.active { opacity: 1; }
 
   .head {
     padding: 26px 20px 10px;
@@ -214,6 +278,48 @@
   }
   .legend b { color: var(--text); font-weight: 600; }
 
+  /* ── 시간표 테이블 ───────────────────────────────────── */
+  .ttwrap { padding: 6px 16px 20px; overflow-x: auto; }
+  .tttable {
+    width: 100%;
+    min-width: 380px;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .tttable th, .tttable td {
+    border: 1px solid var(--border);
+    text-align: center;
+    vertical-align: middle;
+  }
+  .tttable thead th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--panel-2);
+    padding: 9px 4px;
+  }
+  .tttable thead th:first-child { background: transparent; border: none; }
+  .tttable thead th.today { color: var(--mint); background: rgba(126,231,135,0.12); }
+  .tttable td.period {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--panel-2);
+    width: 28px;
+    padding: 6px 2px;
+  }
+  .tttable td.subj {
+    font-size: 12.5px;
+    line-height: 1.4;
+    padding: 9px 4px;
+    color: var(--text);
+    word-break: keep-all;
+  }
+  .tttable td.subj.teacher { color: var(--amber); font-weight: 600; }
+  .tttable td.subj.today-col { background: rgba(126,231,135,0.06); }
+  .tttable td.subj.empty { color: var(--border); }
+
   .footer {
     text-align: center;
     padding: 22px 0 0;
@@ -242,12 +348,27 @@
   .footer .src { display: block; margin-top: 4px; opacity: 0.7; }
   .footer .src a { color: inherit; text-decoration: none; }
   .footer .src a:hover { text-decoration: underline; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .cursor {
+    display: inline-block;
+    width: 7px; height: 15px;
+    background: var(--mint);
+    margin-left: 6px;
+    vertical-align: text-bottom;
+    animation: blink 1.1s step-end infinite;
+  }
 
   @media (max-width: 420px) {
     h1 { font-size: 22px; }
     .ln { padding-right: 6px; }
     .datelabel { font-size: 12px; }
     .navbtn { padding: 7px 9px; }
+    .tabchip { padding: 6px 10px; font-size: 11.5px; gap: 5px; }
+    .ttwrap { padding: 6px 8px 16px; }
+    .tttable { min-width: 0; }
+    .tttable td.subj { font-size: 10.5px; padding: 7px 2px; }
+    .tttable td.period { font-size: 10px; width: 20px; }
+    .tttable thead th { font-size: 10.5px; padding: 7px 2px; }
   }
 </style>
 </head>
@@ -258,38 +379,62 @@
         <div class="dots">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
         </div>
-        <span class="filename">급식<span class="ext">.html</span></span>
-      </div>
-
-      <div class="head">
-        <div class="eyebrow">양현고등학교</div>
-        <h1>오늘의 급식<span class="cursor"></span></h1>
-        <div class="sub" id="subline">나이스(NEIS) 급식 정보를 자동으로 불러옵니다</div>
-
-        <div class="datenav">
-          <button class="navbtn" id="prevBtn" type="button">&lsaquo; 이전</button>
-          <span class="datelabel" id="dateLabel">-</span>
-          <button class="navbtn today" id="todayBtn" type="button">오늘</button>
-          <button class="navbtn" id="nextBtn" type="button">다음 &rsaquo;</button>
+        <div class="tabstrip">
+          <button class="tabchip active" id="tabBtnSchedule" type="button"><span class="favdot"></span>시간표<span class="ext">.html</span></button>
+          <button class="tabchip" id="tabBtnMeal" type="button"><span class="favdot"></span>급식<span class="ext">.html</span></button>
         </div>
       </div>
 
-      <div class="feed" id="feed">
-        <div class="state" id="stateBox">
-          <div class="big">⋯</div>
-          불러오는 중입니다
-        </div>
-      </div>
+      <div class="tabpanes-viewport" id="tabViewport">
+        <div class="tabpanes-track" id="tabTrack">
 
-      <div class="legend">
-        <b>알레르기 표시</b> (요리명 옆 괄호 숫자) — 1.난류 2.우유 3.메밀 4.땅콩 5.대두 6.밀 7.고등어 8.게 9.새우 10.돼지고기 11.복숭아 12.토마토 13.아황산류 14.호두 15.닭고기 16.쇠고기 17.오징어 18.조개류(굴·전복·홍합 포함) 19.잣
+          <!-- ── 시간표 탭 ───────────────────────────────── -->
+          <div class="pane active" id="paneSchedule">
+            <div class="head">
+              <div class="eyebrow">양현고등학교 · 3학년 4반</div>
+              <h1>내 시간표<span class="cursor"></span></h1>
+              <div class="sub">수요일은 6교시, 나머지 요일은 7교시예요</div>
+            </div>
+            <div class="ttwrap">
+              <table class="tttable" id="ttTable"></table>
+            </div>
+          </div>
+
+          <!-- ── 급식 탭 ─────────────────────────────────── -->
+          <div class="pane" id="paneMeal">
+            <div class="head">
+              <div class="eyebrow">양현고등학교</div>
+              <h1>오늘의 급식<span class="cursor"></span></h1>
+              <div class="sub" id="subline">나이스(NEIS) 급식 정보를 자동으로 불러옵니다</div>
+
+              <div class="datenav">
+                <button class="navbtn" id="prevBtn" type="button">&lsaquo; 이전</button>
+                <span class="datelabel" id="dateLabel">-</span>
+                <button class="navbtn today" id="todayBtn" type="button">오늘</button>
+                <button class="navbtn" id="nextBtn" type="button">다음 &rsaquo;</button>
+              </div>
+            </div>
+
+            <div class="feed" id="feed">
+              <div class="state" id="stateBox">
+                <div class="big">⋯</div>
+                불러오는 중입니다
+              </div>
+            </div>
+
+            <div class="legend">
+              <b>알레르기 표시</b> (요리명 옆 괄호 숫자) — 1.난류 2.우유 3.메밀 4.땅콩 5.대두 6.밀 7.고등어 8.게 9.새우 10.돼지고기 11.복숭아 12.토마토 13.아황산류 14.호두 15.닭고기 16.쇠고기 17.오징어 18.조개류(굴·전복·홍합 포함) 19.잣
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
     <div class="footer">
       <span class="live">데이터 출처: 나이스(NEIS) 교육정보 개방 포털</span>
-      <span class="src">전북특별자치도교육청 · 양현고등학교</span>
-      <span class="src">제작 · 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></span>
+      <span class="src">전북특별자치도교육청 · 양현고등학교 (SD_SCHUL_CODE 8321083)</span>
+      <span class="src">제작 : 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></span>
     </div>
   </div>
 
@@ -314,12 +459,18 @@
   var MEAL_TAG_CLASS = { '1': 'info', '2': 'ok', '3': 'due' };
   var DOW = ['일', '월', '화', '수', '목', '금', '토'];
 
-  var feed = document.getElementById('feed');
-  var dateLabel = document.getElementById('dateLabel');
-  var subline = document.getElementById('subline');
-  var prevBtn = document.getElementById('prevBtn');
-  var nextBtn = document.getElementById('nextBtn');
-  var todayBtn = document.getElementById('todayBtn');
+  // ── 내 시간표 ───────────────────────────────────────────
+  var TIMETABLE = {
+    keys: ['mon', 'tue', 'wed', 'thu', 'fri'],
+    labels: ['월', '화', '수', '목', '금'],
+    periods: {
+      mon: ['자율', '사회문화', '고상기T', '프로그래밍', '독서', '김나영T', '유익승T'],
+      tue: ['정보과학', '정보과학', '지구과학II', '지구과학II', '미술', '임만규T', '유익승T'],
+      wed: ['교육학', '김나영T', '고상기T', '물리학II', '창체', '창체'],
+      thu: ['유익승T', '생활과 과학', '교육학', '체육', '사회문화', '고급 물리학', '최윤미T'],
+      fri: ['생활과 과학', '고급 물리학', '김나영T', '프로그래밍', '유익승T', '물리학II', '임만규T']
+    }
+  };
 
   function todayKST() {
     // 뷰어의 로컬 시간대와 무관하게 한국 표준시 기준 오늘 날짜를 구함
@@ -334,6 +485,51 @@
     });
     return new Date(Number(y), Number(m) - 1, Number(d));
   }
+
+  // ── 탭 전환 (사파리 스타일) ────────────────────────────────
+  var tabButtons = [document.getElementById('tabBtnSchedule'), document.getElementById('tabBtnMeal')];
+  var panes = [document.getElementById('paneSchedule'), document.getElementById('paneMeal')];
+  var track = document.getElementById('tabTrack');
+  var viewport = document.getElementById('tabViewport');
+  var activeTabIndex = 0;
+
+  function setViewportHeight(index, animate) {
+    var h = panes[index].scrollHeight;
+    if (!animate) {
+      viewport.style.transition = 'none';
+      viewport.style.height = h + 'px';
+      void viewport.offsetHeight; // 강제 리플로우
+      viewport.style.transition = '';
+    } else {
+      viewport.style.height = h + 'px';
+    }
+  }
+
+  function switchTab(index) {
+    if (index === activeTabIndex) return;
+    activeTabIndex = index;
+    tabButtons.forEach(function (btn, i) { btn.classList.toggle('active', i === index); });
+    panes.forEach(function (pane, i) { pane.classList.toggle('active', i === index); });
+    track.style.transform = 'translateX(' + (index === 0 ? '0%' : '-50%') + ')';
+    setViewportHeight(index, true);
+  }
+
+  function syncHeightIfActive(index) {
+    if (index === activeTabIndex) setViewportHeight(index, true);
+  }
+
+  tabButtons.forEach(function (btn, i) {
+    btn.addEventListener('click', function () { switchTab(i); });
+  });
+  window.addEventListener('resize', function () { setViewportHeight(activeTabIndex, false); });
+
+  // ── 급식 탭 로직 ───────────────────────────────────────────
+  var feed = document.getElementById('feed');
+  var dateLabel = document.getElementById('dateLabel');
+  var subline = document.getElementById('subline');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var todayBtn = document.getElementById('todayBtn');
 
   var current = todayKST();
 
@@ -379,8 +575,7 @@
           return res.text();
         })
         .then(function (text) {
-          var json = JSON.parse(text);
-          return json;
+          return JSON.parse(text);
         })
         .catch(function (err) {
           t.clear();
@@ -427,6 +622,7 @@
         '</div>';
       feed.appendChild(item);
     });
+    syncHeightIfActive(1);
   }
 
   function renderState(big, text, showRetry) {
@@ -439,6 +635,7 @@
     if (showRetry) {
       document.getElementById('retryBtn').addEventListener('click', load);
     }
+    syncHeightIfActive(1);
   }
 
   function load() {
@@ -482,7 +679,77 @@
     load();
   });
 
+  // ── 시간표 탭 로직 ─────────────────────────────────────────
+  function isTeacherSlot(name) {
+    return /T$/.test(name);
+  }
+
+  function buildDayPlan(list) {
+    // 연속으로 같은 과목이 이어지면 하나의 칸(rowspan)으로 묶기 위한 구간 계산
+    var segments = [];
+    var i = 0;
+    while (i < list.length) {
+      var j = i + 1;
+      while (j < list.length && list[j] === list[i]) j++;
+      segments.push({ start: i, span: j - i, val: list[i] });
+      i = j;
+    }
+    return segments;
+  }
+
+  function renderTimetable() {
+    var table = document.getElementById('ttTable');
+    var dow = todayKST().getDay(); // 0=일 .. 6=토
+    var todayIdx = (dow >= 1 && dow <= 5) ? dow - 1 : -1;
+    var maxPeriod = 7;
+
+    var thead = '<thead><tr><th></th>' + TIMETABLE.labels.map(function (l, idx) {
+      return '<th class="' + (idx === todayIdx ? 'today' : '') + '">' + l + '</th>';
+    }).join('') + '</tr></thead>';
+
+    var plans = TIMETABLE.keys.map(function (k) { return buildDayPlan(TIMETABLE.periods[k]); });
+    var segStartMap = plans.map(function (segs) {
+      var map = {};
+      segs.forEach(function (seg) { map[seg.start] = seg; });
+      return map;
+    });
+    var skipMap = plans.map(function (segs) {
+      var map = {};
+      segs.forEach(function (seg) {
+        for (var k = seg.start + 1; k < seg.start + seg.span; k++) map[k] = true;
+      });
+      return map;
+    });
+
+    var rows = '';
+    for (var p = 0; p < maxPeriod; p++) {
+      var cells = '<td class="period">' + (p + 1) + '</td>';
+      for (var d = 0; d < TIMETABLE.keys.length; d++) {
+        var key = TIMETABLE.keys[d];
+        var dayList = TIMETABLE.periods[key];
+        var colClass = d === todayIdx ? 'today-col' : '';
+
+        if (p >= dayList.length) {
+          cells += '<td class="subj empty ' + colClass + '">–</td>';
+          continue;
+        }
+        if (skipMap[d][p]) continue; // 위 칸의 rowspan에 이미 포함됨
+
+        var seg = segStartMap[d][p];
+        var teacherClass = isTeacherSlot(seg.val) ? 'teacher' : '';
+        var rowspanAttr = seg.span > 1 ? ' rowspan="' + seg.span + '"' : '';
+        cells += '<td class="subj ' + teacherClass + ' ' + colClass + '"' + rowspanAttr + '>' + seg.val + '</td>';
+      }
+      rows += '<tr>' + cells + '</tr>';
+    }
+
+    table.innerHTML = thead + '<tbody>' + rows + '</tbody>';
+  }
+
+  // ── 초기화 ─────────────────────────────────────────────────
+  renderTimetable();
   load();
+  setViewportHeight(0, false);
 })();
 </script>
 </body>
