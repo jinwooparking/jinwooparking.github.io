@@ -622,6 +622,7 @@
     </div>
 
     <div class="footer">
+      <span class="live">데이터 출처: 나이스(NEIS) 교육정보 개방 포털</span>
       <span class="src">제작 · 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></span>
     </div>
   </div>
@@ -772,6 +773,33 @@
   function isSchoolHoliday(y, mo, d) {
     return !!SCHOOL_HOLIDAY_SET[y + '-' + pad2(mo) + '-' + pad2(d)];
   }
+
+  // 자정부터 새벽 5시까지는 '오늘 등교 전'이라기보다 '어젯밤의 연장'에 가까워서(아직 안
+  // 자고 있거나 막 잠든 시간대), 이 시간대는 등교 전 문구 대신 하교 후 문구를 그대로 보여줌
+  var EARLY_MORNING_CUTOFF_MIN = 5 * 60; // 05:00
+
+  // 지금 오프라인 상태인 '이유'를 하나 고름. 주말·공휴일은 시간과 무관하게 그 자체가
+  // 이유가 되고, 그 외(평일)에는 아직 등교 전인지 이미 하교했는지를 시계로 구분함
+  function offlineReason() {
+    var t = todayKST();
+    var dow = t.getDay();
+    if (dow === 0 || dow === 6) return 'weekend';
+    if (isSchoolHoliday(t.getFullYear(), t.getMonth() + 1, t.getDate())) return 'holiday';
+    var dayIdx = dow - 1;
+    var now = nowKSTMinutes();
+    if (now < EARLY_MORNING_CUTOFF_MIN) return 'after';
+    if (now >= schoolEndMinForDay(dayIdx)) return 'after';
+    return 'before';
+  }
+
+  // 오프라인 안내 문구를 이유별로 다르게: "학교에 있을 시간이 아닙니다"처럼 마치 학교에
+  // 있으면 안 되는 것 같은 뉘앙스 대신, 지금이 정확히 어떤 시간대인지 설명하는 쪽으로
+  var OFFLINE_MESSAGES = {
+    before: '아직 등교 시간 전이에요. 천천히 준비해요! 🌅',
+    after: '학교 수업이 모두 끝났어요. 수고했어요! 🏠',
+    weekend: '오늘은 주말이에요. 편히 쉬세요! 🏠',
+    holiday: '오늘은 공휴일이에요. 편히 쉬세요! 🏠'
+  };
 
   // ── 반짝임("숨쉬기") 렌더러 ──────────────────────────────────
   //
@@ -1241,7 +1269,8 @@
 
     var panel = document.getElementById('ttRoomInfo');
     var inner = document.getElementById('ttRoomInfoInner');
-    inner.innerHTML = '<span class="roomnote offline">지금은 학교에 있을 시간이 아닙니다. 편히 쉬세요! 🏠</span>';
+    var msg = OFFLINE_MESSAGES[offlineReason()] || OFFLINE_MESSAGES.weekend;
+    inner.innerHTML = '<span class="roomnote offline">' + msg + '</span>';
     var newH = panelNeededHeight(inner);
     panel.style.transition = 'none';
     panel.style.height = newH + 'px';
