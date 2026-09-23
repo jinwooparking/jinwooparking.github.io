@@ -212,9 +212,6 @@
     font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.01em;
-    /* "오늘의 급식"처럼 띄어쓰기가 들어간 제목은 한글 폰트의 기본 공백 폭이 커서 단어 사이가
-       유독 벌어져 보임 — 살짝 좁혀서 자연스럽게 */
-    word-spacing: -0.08em;
   }
   .sub {
     color: var(--muted);
@@ -259,6 +256,11 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: background 0.15s ease, border-color 0.15s ease;
+    /* 버튼 글자는 절대 줄바꿈되지 않게, 폭이 모자라면 대신 가운데 datelabel 쪽이
+       줄어들거나 줄바꿈되도록 함(달력 아이콘이 하나 더 늘어난 좁은 화면에서 버튼
+       텍스트가 세로로 쪼개져 보이는 걸 방지) */
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .navbtn:hover { background: var(--border); }
   .navbtn:active { transform: translateY(1px); }
@@ -268,6 +270,7 @@
   }
   .datelabel {
     flex: 1;
+    min-width: 0;
     font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 13px;
     color: var(--text);
@@ -276,6 +279,36 @@
   .datelabel .dow {
     color: var(--amber);
     margin-left: 4px;
+  }
+  .calbtn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    line-height: 1;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .calbtn:hover { background: var(--border); }
+  .calbtn:active { transform: translateY(1px); }
+  /* 화면에는 안 보이지만(display:none이 아니어야 브라우저 기본 날짜 선택기가 정상 동작함)
+     레이아웃 공간은 차지하지 않도록 숨김 */
+  .calpick-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    opacity: 0;
+    overflow: hidden;
   }
 
   .feed { padding: 8px 12px 20px; min-height: 120px; }
@@ -547,8 +580,10 @@
   @media (max-width: 420px) {
     h1 { font-size: 22px; }
     .ln { padding-right: 6px; }
-    .datelabel { font-size: 12px; }
-    .navbtn { padding: 7px 9px; }
+    .datelabel { font-size: 11.5px; }
+    .datenav { gap: 6px; }
+    .navbtn { padding: 7px 8px; font-size: 11px; }
+    .calbtn { width: 27px; height: 27px; font-size: 12.5px; }
     .tabchip { padding: 6px 10px; font-size: 11.5px; gap: 5px; }
     .ttwrap { padding: 8px 8px 16px; }
     .tt-grid { grid-template-columns: 24px repeat(5, 1fr); gap: 4px; }
@@ -603,6 +638,12 @@
               <div class="datenav">
                 <button class="navbtn" id="prevBtn" type="button">&lsaquo; 이전</button>
                 <span class="datelabel" id="dateLabel">-</span>
+                <!-- input[type=date]는 눈에 안 보이게 숨기고, label로 감싼 달력 이모지를 눌렀을 때
+                     그 label-for 연결을 통해 브라우저 기본 날짜 선택기가 뜨도록 함. 직접 만든
+                     달력 팝업 대신 이렇게 하면 월/연도 이동, 큰 범위 점프(예: 몇 달 전으로) 같은
+                     처리를 전부 각 브라우저(사파리/크롬)의 검증된 기본 UI에 맡길 수 있음 -->
+                <label class="calbtn" for="calPick" title="날짜 선택" aria-label="날짜 선택">📅</label>
+                <input type="date" id="calPick" class="calpick-hidden" aria-hidden="true" tabindex="-1">
                 <button class="navbtn today" id="todayBtn" type="button">오늘</button>
                 <button class="navbtn" id="nextBtn" type="button">다음 &rsaquo;</button>
               </div>
@@ -625,6 +666,7 @@
     </div>
 
     <div class="footer">
+      <span class="live">데이터 출처: 나이스(NEIS) 교육정보 개방 포털</span>
       <span class="src">제작 · 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></span>
     </div>
   </div>
@@ -988,6 +1030,7 @@
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
   var todayBtn = document.getElementById('todayBtn');
+  var calPick = document.getElementById('calPick');
 
   var current = todayKST();
 
@@ -1098,6 +1141,8 @@
 
   function load() {
     dateLabel.textContent = fmtLabel(current) + ' ' + DOW[current.getDay()] + '요일';
+    // 달력 아이콘을 눌렀을 때 지금 보고 있는 날짜부터 열리도록, value를 항상 current와 맞춰둠
+    calPick.value = current.getFullYear() + '-' + pad2(current.getMonth() + 1) + '-' + pad2(current.getDate());
     // visibility:hidden이면 자리(박스)는 그대로 차지해서 날짜가 '이전'과 '다음' 사이가 아니라
     // '이전'과 (보이지 않는) '오늘' 사이에서 가운데정렬되어 버림 -> display:none으로 아예
     // 레이아웃에서 빼서, 버튼이 없을 땐 '이전'~'다음' 사이에서 정확히 가운데정렬되게 함
@@ -1137,6 +1182,12 @@
   });
   todayBtn.addEventListener('click', function () {
     current = todayKST();
+    load();
+  });
+  calPick.addEventListener('change', function () {
+    if (!calPick.value) return;
+    var parts = calPick.value.split('-');
+    current = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     load();
   });
 
