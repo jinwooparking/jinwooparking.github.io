@@ -298,11 +298,19 @@
   }
   .calbtn:hover { background: var(--border); }
   .calbtn:active { transform: translateY(1px); }
-  /* 화면에는 안 보이지만(display:none이면 showPicker()가 동작하지 않는 브라우저가 있어서
-     visibility:hidden만 사용) 레이아웃 공간은 차지하지 않도록 숨김 */
+  /* 화면에는 안 보이지만 완전히 숨기지는 않음: display:none이나 visibility:hidden을 쓰면
+     "렌더링되고 있지 않다"고 판단해서 showPicker()가 조용히 실패하는 브라우저(특히 iOS
+     사파리)가 있어서, opacity:0 + 아주 작은 크기로만 숨겨 실제로는 계속 "렌더링 중"인
+     상태를 유지함 */
   .calpick-hidden {
     position: absolute;
-    visibility: hidden;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    opacity: 0;
+    overflow: hidden;
     pointer-events: none;
   }
 
