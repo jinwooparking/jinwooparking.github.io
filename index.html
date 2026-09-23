@@ -538,7 +538,7 @@
         </div>
         <div class="tabstrip">
           <button class="tabchip active" id="tabBtnSchedule" type="button"><span class="favdot"></span>시간표<span class="ext">.html</span></button>
-          <button class="tabchip" id="tabBtnMeal" type="button"><span class="favdot"></span>급식<span class="ext">.html</span></button>
+          <button class="tabchip" id="tabBtnMeal" type="button"><span class="favdot"></span>오늘의 급식<span class="ext">.html</span></button>
         </div>
       </div>
 
@@ -1153,6 +1153,15 @@
   // isAuto = false/생략 → 사용자가 직접 탭해서 연 것 (핑크로 선택 표시)
   function selectRoomTile(tile, isAuto) {
     if (activeRoomTile === tile) {
+      // 쉬는시간이 되면 다음 교시 타일이 자동으로 미리보기(주황)로 떠 있는데, 이 상태에서
+      // 그 타일을 처음 수동으로 탭하면 "이미 활성화된 타일"이라 그냥 닫혀버리고 다른 타일처럼
+      // 핑크로 선택될 기회가 없었음. 점심시간 바가 아니고 아직 핑크로 선택되지 않은 상태에서
+      // 수동으로 탭한 거라면, 닫는 대신 다른 타일과 똑같이 핑크로 선택되게 함
+      if (!isAuto && tile.dataset.lunch !== 'true' && !tile.classList.contains('selected')) {
+        tile.classList.add('selected');
+        syncLunchBarFocus();
+        return;
+      }
       collapseRoomPanel();
       return;
     }
@@ -1175,8 +1184,13 @@
       noteHtml = '<span class="roomnote">현재는 점심시간입니다. 다음 수업을 미리 준비하세요! 🔥</span>' +
         '<span class="roomcountdown">⏳ 다음 수업까지 남은 시간 : <span id="ttCountdownVal">00:00</span></span>';
     } else if (isLunchBar) {
-      // 점심시간이 아닌 때 바를 직접 눌러본 경우
+      // 점심시간이 아닌 때 바를 직접 눌러본 경우 — 쉬는시간 중이라면 다른 타일처럼
+      // "현재는 쉬는시간입니다 · 다음 수업까지 남은 시간" 안내도 같이 띄움
       lineHtml = '<span class="roomline"><span class="roomdot"></span>점심시간 (12:30 ~ 13:30)</span>';
+      if (status.type === 'break') {
+        noteHtml = '<span class="roomnote">현재는 쉬는시간입니다. 다음 수업을 미리 준비하세요! 🔥</span>' +
+          '<span class="roomcountdown">⏳ 다음 수업까지 남은 시간 : <span id="ttCountdownVal">00:00</span></span>';
+      }
     } else {
       // 이동수업 타일이면 아이콘을 파란색으로 달리 표시해 일반 과목과 구분
       var dotClass = isMovingClass(tile.dataset.subject) ? ' roomdot-move' : '';
