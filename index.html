@@ -97,7 +97,7 @@
   .editor {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
   }
@@ -141,7 +141,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     font-weight: 600;
     color: var(--muted);
@@ -202,7 +202,7 @@
     padding: 26px 20px 10px;
   }
   .eyebrow {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     color: var(--mint);
   }
@@ -223,7 +223,7 @@
     align-items: center;
     gap: 6px;
     margin-top: 8px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     font-weight: 600;
     color: var(--muted);
@@ -236,6 +236,7 @@
   }
   .statusline.on-class { --dot-rgb: 126,231,135; }
   .statusline.on-break { --dot-rgb: 255,123,156; }
+  .statusline.offline { --dot-rgb: 125,133,144; }
 
   .datenav {
     display: flex;
@@ -244,7 +245,7 @@
     margin-top: 14px;
   }
   .navbtn {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     font-weight: 600;
     color: var(--text);
@@ -264,7 +265,7 @@
   }
   .datelabel {
     flex: 1;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 13px;
     color: var(--text);
     text-align: center;
@@ -284,7 +285,7 @@
   }
   .item:hover { background: var(--panel-2); }
   .ln {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     color: var(--muted);
     font-size: 12px;
     text-align: right;
@@ -295,7 +296,7 @@
   .content { padding: 12px 14px; }
   .tag {
     display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 11px;
     font-weight: 600;
     padding: 2px 8px;
@@ -310,24 +311,27 @@
   .dish-row { display: block; }
   .allergy { color: var(--muted); font-size: 12px; }
   .meta {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 11px;
     color: var(--muted);
     margin-top: 8px;
   }
 
   .state {
+    /* 여기는 코드 라벨이 아니라 실제 안내 문장(줄글)이 나오는 자리라, JetBrains Mono가
+       섞인 스택을 쓰면 한글이 모노스페이스 격자 폭에 맞춰져 자간이 부자연스럽게 벌어져
+       보임 — 본문과 같은 순수 산세리프 한글 폰트로 통일 */
+    font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
     padding: 40px 20px;
     text-align: center;
     color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     line-height: 1.7;
   }
   .state .big { font-size: 26px; margin-bottom: 6px; }
   .retrybtn {
     margin-top: 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     color: var(--mint);
     background: rgba(126,231,135,0.1);
@@ -338,7 +342,9 @@
   }
 
   .legend {
-    padding: 14px 20px 4px;
+    /* 아래쪽 padding이 4px뿐이라 카드 하단에 알레르기 문구가 바짝 붙어 갑갑해 보였음 —
+       위쪽(14px)과 비슷한 수준으로 맞춰 여유를 줌 */
+    padding: 14px 20px 18px;
     border-top: 1px solid var(--border);
     color: var(--muted);
     font-size: 11px;
@@ -360,7 +366,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     font-weight: 600;
     color: var(--muted);
@@ -382,7 +388,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 11px;
     font-weight: 700;
     color: var(--muted);
@@ -402,7 +408,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 11.5px;
     font-weight: 600;
     line-height: 1.3;
@@ -441,10 +447,13 @@
     transition: height 0.4s cubic-bezier(0.65,0,0.35,1);
   }
   .tt-roominfo-inner {
-    padding: 12px 10px 12px;
+    /* 아래쪽은 자체 padding을 안 주고 부모 .ttwrap의 bottom padding(20px)만 쓰게 해서,
+       위쪽 여백(margin-top 8px + padding-top 12px ≈ 20px)과 균형을 맞춤 — 예전엔 여기 12px가
+       .ttwrap의 20px 위에 그대로 더해져서 아래쪽이 위쪽보다 훨씬 넓어 보였음 */
+    padding: 12px 10px 0;
     margin-top: 8px;
     border-top: 1px dashed var(--border);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
     text-align: center;
     line-height: 1.5;
@@ -469,6 +478,12 @@
     font-weight: 600;
     opacity: 1;
   }
+  /* 오프라인(등교 전 · 하교 후 · 주말) 안내는 위에 다른 줄 없이 혼자 쓰이므로 여백을 없애고,
+     "곧 수업"이 아니라 "지금은 아무 일도 없음"이라는 톤에 맞춰 앰버 대신 muted 톤을 씀 */
+  .tt-roominfo-inner .roomnote.offline {
+    margin-top: 0;
+    color: var(--muted);
+  }
   .tt-roominfo-inner .roomcountdown {
     display: block;
     margin-top: 3px;
@@ -481,7 +496,7 @@
     text-align: center;
     padding: 22px 0 0;
     color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
   }
   .footer .live {
@@ -627,10 +642,10 @@
     labels: ['월', '화', '수', '목', '금'],
     periods: {
       mon: ['자율', '사회문화', '고상기T', '프로그래밍', '독서', '김나영T', '유익승T'],
-      tue: ['정보과학', '정보과학', '지구과학II', '지구과학II', '미술', '임만규T', '유익승T'],
-      wed: ['교육학', '김나영T', '고상기T', '물리학II', '창체', '창체'],
+      tue: ['정보과학', '정보과학', '지구과학Ⅱ', '지구과학Ⅱ', '미술', '임만규T', '유익승T'],
+      wed: ['교육학', '김나영T', '고상기T', '물리학Ⅱ', '창체', '창체'],
       thu: ['유익승T', '생활과 과학', '교육학', '체육', '사회문화', '고급 물리학', '최윤미T'],
-      fri: ['생활과 과학', '고급 물리학', '김나영T', '프로그래밍', '유익승T', '물리학II', '임만규T']
+      fri: ['생활과 과학', '고급 물리학', '김나영T', '프로그래밍', '유익승T', '물리학Ⅱ', '임만규T']
     }
   };
 
@@ -640,8 +655,8 @@
     '사회문화': '3학년 5반 (4F)',
     '프로그래밍': '공용교실5 (3F)',
     '정보과학': '공용교실5 (3F)',
-    '지구과학II': '3학년 7반 (4F)',
-    '물리학II': '3학년 4반 (4F)',
+    '지구과학Ⅱ': '3학년 7반 (4F)',
+    '물리학Ⅱ': '3학년 4반 (4F)',
     '생활과 과학': '3학년 4반 (4F)',
     '교육학': '3학년 9반 (4F)',
     '고급 물리학': '3학년 4반 (4F)'
@@ -672,6 +687,18 @@
     [15 * 60 + 30, 16 * 60 + 20]  // 7교시 15:30-16:20
   ];
   var LUNCH_AFTER_INDEX = 3; // 4교시(인덱스 3) 다음이 점심시간
+
+  // 등교 전 / 하교 후 / 주말은 "학교에 있는 시간"이 아니므로 쉬는시간으로 표기하면 안 됨.
+  // 등교 시각은 요일 상관없이 08:30 고정, 하교 시각은 그 날 실제 마지막 교시가 끝나는
+  // 시각을 PERIOD_TIMES/TIMETABLE에서 그대로 계산해서 구함(수요일은 7교시가 없어 6교시가
+  // 끝나는 15:20, 나머지 요일은 7교시가 끝나는 16:20이 자동으로 나옴 — 요일별 교시 수가
+  // 바뀌어도 여기 숫자를 따로 고칠 필요 없음)
+  var SCHOOL_START_MIN = 8 * 60 + 30; // 08:30
+  function schoolEndMinForDay(dayIdx) {
+    var key = TIMETABLE.keys[dayIdx];
+    var maxP = TIMETABLE.periods[key].length;
+    return PERIOD_TIMES[maxP - 1][1];
+  }
 
   // 점심시간 바가 4교시와 5교시 사이에 한 줄 끼어들면서, 그 뒤 교시들의 그리드 행 위치와
   // 줄무늬(흰/회색) 순서가 한 칸씩 밀림. 아래 두 헬퍼로 그 밀림을 한 곳에서 계산함
@@ -845,17 +872,33 @@
     requestAnimationFrame(renderGlowFrame);
   }
 
-  // 지금 진행 중인 교시 / 쉬는시간(다음 교시 예고) 상태를 계산
-  function getCurrentPeriodStatus() {
+  // 지금 진행 중인 교시 / 쉬는시간(다음 교시 예고) 상태를 계산.
+  // PERIOD_TIMES는 요일과 무관하게 시간대만 정해둔 표라서, 수요일처럼 7교시가 아예 없는
+  // 요일에도 시계상 15:30~16:20이면 그냥 "7교시 진행 중"이라고 잘못 판단해버림. dayIdx를
+  // 넘겨받아 그 요일에 실제로 존재하는 교시 수(maxP)를 넘는 교시는 '없는 교시'로 처리해서
+  // 수요일 7교시 시간대엔 진행 중인 수업도, 예고할 다음 교시도 없는 것으로 취급함.
+  // 주말(dayIdx < 0)이거나 그 날의 등교~하교 시간대 바깥이면(등교 전 · 하교 후) '학교에
+  // 있는 시간'이 아니므로 쉬는시간이 아니라 'offline'으로 취급함
+  function getCurrentPeriodStatus(dayIdx) {
     var now = nowKSTMinutes();
+    if (dayIdx == null || dayIdx < 0 || !TIMETABLE.keys[dayIdx]) {
+      return { type: 'offline', periodIndex: null };
+    }
+    if (now < SCHOOL_START_MIN || now >= schoolEndMinForDay(dayIdx)) {
+      return { type: 'offline', periodIndex: null };
+    }
+    var maxP = TIMETABLE.periods[TIMETABLE.keys[dayIdx]].length;
     for (var i = 0; i < PERIOD_TIMES.length; i++) {
       if (now >= PERIOD_TIMES[i][0] && now < PERIOD_TIMES[i][1]) {
+        if (i >= maxP) return { type: 'none', periodIndex: null };
         return { type: 'class', periodIndex: i };
       }
     }
     for (var j = 0; j < PERIOD_TIMES.length - 1; j++) {
       if (now >= PERIOD_TIMES[j][1] && now < PERIOD_TIMES[j + 1][0]) {
-        return { type: (j === LUNCH_AFTER_INDEX ? 'lunch' : 'break'), periodIndex: j + 1 };
+        var nextP = j + 1;
+        if (nextP >= maxP) return { type: 'none', periodIndex: null };
+        return { type: (j === LUNCH_AFTER_INDEX ? 'lunch' : 'break'), periodIndex: nextP };
       }
     }
     return { type: 'none', periodIndex: null };
@@ -1015,7 +1058,10 @@
 
   function load() {
     dateLabel.textContent = fmtLabel(current) + ' ' + DOW[current.getDay()] + '요일';
-    todayBtn.style.visibility = ymd(current) === ymd(todayKST()) ? 'hidden' : 'visible';
+    // visibility:hidden이면 자리(박스)는 그대로 차지해서 날짜가 '이전'과 '다음' 사이가 아니라
+    // '이전'과 (보이지 않는) '오늘' 사이에서 가운데정렬되어 버림 -> display:none으로 아예
+    // 레이아웃에서 빼서, 버튼이 없을 땐 '이전'~'다음' 사이에서 정확히 가운데정렬되게 함
+    todayBtn.style.display = ymd(current) === ymd(todayKST()) ? 'none' : '';
     renderState('⋯', '불러오는 중입니다', false);
     subline.textContent = '나이스(NEIS) 급식 정보를 자동으로 불러옵니다';
 
@@ -1024,20 +1070,20 @@
       if (!body) {
         var code = json && json.RESULT && json.RESULT.CODE;
         if (code === 'INFO-200') {
-          renderState('🍽️', '이 날은 급식 정보가 없습니다\n(주말 · 공휴일 · 방학 등)', false);
+          renderState('🍽️', '이 날은 급식 정보가 없습니다<br>(주말 · 공휴일 · 방학 등)', false);
         } else {
-          renderState('!', '데이터를 불러오지 못했습니다', true);
+          renderState('!', '데이터를 불러오지 못했습니다<br>혹시 네트워크 문제가 아닌가요? 권장 브라우저(Safari · Chrome)로 시도해보세요', true);
         }
         return;
       }
       var rows = body[1] && body[1].row ? body[1].row : [];
       if (!rows.length) {
-        renderState('🍽️', '이 날은 급식 정보가 없습니다\n(주말 · 공휴일 · 방학 등)', false);
+        renderState('🍽️', '이 날은 급식 정보가 없습니다<br>(주말 · 공휴일 · 방학 등)', false);
         return;
       }
       renderMeals(rows);
     }).catch(function () {
-      renderState('!', '데이터를 불러오지 못했습니다\n(네트워크 상태를 확인해 주세요)', true);
+      renderState('!', '데이터를 불러오지 못했습니다<br>(네트워크 상태를 확인해 주세요)<br>혹시 네트워크 문제가 아닌가요? 권장 브라우저(Safari · Chrome)로 시도해보세요', true);
     });
   }
 
@@ -1075,7 +1121,8 @@
   var activeRoomTile = null;
   var countdownTimer = null;
   var panelIsBreakPreview = false; // 지금 열려있는 안내 패널이 "쉬는시간 자동 안내"인지 여부
-  var lastBreakKey = null; // 같은 쉬는시간 구간인지 구분 (요일:교시)
+  var panelIsOffline = false; // 지금 열려있는 안내 패널이 "학교에 있을 시간이 아님" 안내인지 여부
+  var lastBreakKey = null; // 같은 쉬는시간 구간인지 구분 (요일:교시, 오프라인이면 별도 키)
   var autoSuppressed = false; // 사용자가 직접 다른 타일을 눌렀으면 그 쉬는시간 동안은 자동 갱신을 멈춤
 
   function clearCountdownTimer() {
@@ -1100,6 +1147,15 @@
     el.textContent = pad2(m) + ':' + pad2(s);
   }
 
+  // .tt-roominfo(패널)를 펼칠 목표 높이를 잰다. scrollHeight는 padding/border까지는
+  // 포함하지만 margin은 포함하지 않는데, .tt-roominfo-inner에 margin-top(그리드와 점선
+  // 구분선 사이 여백)이 있어서 이걸 빼먹으면 딱 그 margin만큼 패널이 모자라게 펼쳐져
+  // 내용 아랫부분이 잘림 — 예전엔 아래쪽 padding이 넉넉해서 티가 안 났을 뿐, 원래 있던 버그
+  function panelNeededHeight(inner) {
+    var mt = parseFloat(getComputedStyle(inner).marginTop) || 0;
+    return mt + inner.scrollHeight + 1; // +1은 서브픽셀 반올림으로 인한 하단 텍스트 잘림 방지
+  }
+
   // 타일이 'selected'(핑크) 클래스를 잃으면 반짝임은 renderGlowFrame이 매 프레임 알아서
   // 다시 그려주므로(더 이상 별도로 맞춰줄 게 없음) 그냥 클래스만 떼면 됨
   function deselectTile(el) {
@@ -1116,25 +1172,9 @@
     bar.classList.toggle('lunch-focus', isFocused);
   }
 
-  function collapseRoomPanel() {
-    clearCountdownTimer();
-    panelIsBreakPreview = false;
-    deselectTile(activeRoomTile);
-    activeRoomTile = null;
-
-    // 쉬는시간·점심시간에는 부가정보를 완전히 닫지 않고, 그 시간의 안내 정보로 되돌아감
-    // (타일 자체의 선택/해제는 항상 되지만, 패널은 남은 시간이 0이 될 때까지 계속 떠 있어야 함)
-    var status = getCurrentPeriodStatus();
-    if (status.type === 'lunch' || status.type === 'break') {
-      var fallbackTile = status.type === 'lunch'
-        ? document.getElementById('ttLunchBar')
-        : findTileForPeriod(todayIdxCache, status.periodIndex);
-      if (fallbackTile) {
-        selectRoomTile(fallbackTile, true);
-        return;
-      }
-    }
-
+  // 패널을 실제로 높이 0으로 접는 공통 로직 (collapseRoomPanel의 "더 보여줄 안내가 없을 때"
+  // 최종 분기와, 오프라인 상태가 끝났을 때 applyNowGlow에서 공용으로 사용)
+  function closePanelRaw() {
     var panel = document.getElementById('ttRoomInfo');
     // 패널 자신의 트랜지션은 끄고 즉시 목표 높이로 반영 — 바깥 뷰포트(viewport)가 overflow:hidden +
     // 자기 자신의 height 트랜지션으로 "접히는" 효과를 대신 담당하고, 이후 scrollHeight를 다시
@@ -1147,6 +1187,55 @@
     panel.classList.remove('open');
     syncLunchBarFocus();
     syncHeightIfActive(0);
+  }
+
+  // 등교 전 · 하교 후 · 주말: 특정 타일과 연결되지 않은 순수 안내문을 같은 패널에 띄움
+  // (쉬는시간·점심시간 자동 안내와 같은 패턴이지만, 반짝이거나 선택 표시할 타일이 없음)
+  function showOfflineNotice() {
+    clearCountdownTimer();
+    deselectTile(activeRoomTile);
+    activeRoomTile = null;
+    panelIsBreakPreview = false;
+    panelIsOffline = true;
+
+    var panel = document.getElementById('ttRoomInfo');
+    var inner = document.getElementById('ttRoomInfoInner');
+    inner.innerHTML = '<span class="roomnote offline">지금은 학교에 있을 시간이 아닙니다. 편히 쉬세요! 🏠</span>';
+    var newH = panelNeededHeight(inner);
+    panel.style.transition = 'none';
+    panel.style.height = newH + 'px';
+    void panel.offsetHeight;
+    panel.style.transition = '';
+    panel.classList.add('open');
+    syncLunchBarFocus();
+    syncHeightIfActive(0);
+  }
+
+  function collapseRoomPanel() {
+    clearCountdownTimer();
+    panelIsBreakPreview = false;
+    panelIsOffline = false;
+    deselectTile(activeRoomTile);
+    activeRoomTile = null;
+
+    // 쉬는시간·점심시간·오프라인(등교 전/하교 후/주말)에는 부가정보를 완전히 닫지 않고, 그
+    // 시간의 안내 정보로 되돌아감 (타일 자체의 선택/해제는 항상 되지만, 패널은 그 상태가
+    // 끝날 때까지 계속 떠 있어야 함)
+    var status = getCurrentPeriodStatus(todayIdxCache);
+    if (status.type === 'lunch' || status.type === 'break') {
+      var fallbackTile = status.type === 'lunch'
+        ? document.getElementById('ttLunchBar')
+        : findTileForPeriod(todayIdxCache, status.periodIndex);
+      if (fallbackTile) {
+        selectRoomTile(fallbackTile, true);
+        return;
+      }
+    } else if (status.type === 'offline') {
+      showOfflineNotice();
+      return;
+    }
+
+    closePanelRaw();
   }
 
   // isAuto = true → 쉬는시간/점심시간이 되어 자동으로 열린 미리보기 (기존처럼 주황 반짝임 유지, 핑크로 바꾸지 않음)
@@ -1171,11 +1260,12 @@
     var inner = document.getElementById('ttRoomInfoInner');
 
     var isLunchBar = tile.dataset.lunch === 'true';
-    var status = getCurrentPeriodStatus();
+    var status = getCurrentPeriodStatus(todayIdxCache);
     var breakTargetTile = (status.type === 'break' || status.type === 'lunch')
       ? (status.type === 'lunch' ? document.getElementById('ttLunchBar') : findTileForPeriod(todayIdxCache, status.periodIndex))
       : null;
     panelIsBreakPreview = !!(breakTargetTile && breakTargetTile === tile);
+    panelIsOffline = false; // 실제 타일을 보여주는 것이므로 오프라인 안내 상태는 해제
 
     var lineHtml = '', noteHtml = '';
     if (isLunchBar && status.type === 'lunch') {
@@ -1209,7 +1299,7 @@
       tickCountdown(status.periodIndex);
       countdownTimer = setInterval(function () { tickCountdown(status.periodIndex); }, 1000);
     }
-    var newH = inner.scrollHeight + 1; // 서브픽셀 반올림으로 인한 하단 텍스트 잘림 방지
+    var newH = panelNeededHeight(inner);
 
     // 패널 자신의 트랜지션은 끄고 즉시 목표 높이로 반영 (위 collapseRoomPanel 참고) —
     // 뷰포트가 대신 부드럽게 펼쳐지고, 이후 scrollHeight를 다시 재도 항상 최종값을 읽음.
@@ -1326,7 +1416,7 @@
         // 점심시간 바 자신은 다시 눌러도 닫히지 않고 항상 점심시간 정보를 유지함.
         // (다른 과목 타일은 평소처럼 다시 누르면 선택 해제되고, 점심시간이면 그 뒤 점심시간
         // 정보로 자동으로 돌아감 — collapseRoomPanel 참고)
-        if (getCurrentPeriodStatus().type === 'lunch' && tile.dataset.lunch === 'true' && activeRoomTile === tile) {
+        if (getCurrentPeriodStatus(todayIdxCache).type === 'lunch' && tile.dataset.lunch === 'true' && activeRoomTile === tile) {
           return;
         }
         autoSuppressed = true; // 사용자가 직접 조작했으니 이번 쉬는시간 동안은 자동으로 건드리지 않음
@@ -1353,8 +1443,9 @@
     var grid = document.getElementById('ttGrid');
     grid.querySelectorAll('.now-glow').forEach(function (t) { t.classList.remove('now-glow'); });
 
-    var status = { type: 'none', periodIndex: null };
-    if (todayIdxCache >= 0) status = getCurrentPeriodStatus();
+    // dayIdx가 음수(주말)여도 getCurrentPeriodStatus가 알아서 'offline'으로 처리해주므로
+    // 별도 분기 없이 항상 그대로 넘김
+    var status = getCurrentPeriodStatus(todayIdxCache);
 
     if (status.type === 'lunch') {
       // 점심시간에는 5교시 타일 대신 점심시간 바 전체가 반짝임
@@ -1364,7 +1455,9 @@
       var nowTile = findTileForPeriod(todayIdxCache, status.periodIndex);
       if (nowTile) { nowTile.classList.add('now-glow'); }
 
-      if (status.type === 'class') {
+      // nowTile이 있을 때만(= 오늘 실제로 그 교시에 수업이 있을 때만) 왼쪽 교시 숫자도 같이 반짝임.
+      // getCurrentPeriodStatus가 이미 요일별 교시 수를 걸러주지만, 혹시 모를 경우를 대비한 이중 방어
+      if (status.type === 'class' && nowTile) {
         var periodEl = grid.querySelector('.tt-period[data-period-index="' + status.periodIndex + '"]');
         if (periodEl) { periodEl.classList.add('now-glow'); }
       }
@@ -1382,10 +1475,23 @@
       if (targetTile && !autoSuppressed && activeRoomTile !== targetTile) {
         selectRoomTile(targetTile, true);
       }
+    } else if (status.type === 'offline') {
+      // 등교 전 / 하교 후 / 주말 — 특정 타일과 무관한 순수 안내문이라 breakKey 대신
+      // "언제부터 오프라인 상태가 됐는지"만 구분해서 새 오프라인 구간이 시작될 때마다
+      // 자동 안내를 다시 허용함 (사용자가 직접 다른 타일을 눌러본 뒤에도 마찬가지)
+      var offlineKey = 'offline:' + todayIdxCache + ':' + (nowKSTMinutes() < SCHOOL_START_MIN ? 'before' : 'after');
+      if (offlineKey !== lastBreakKey) {
+        lastBreakKey = offlineKey;
+        autoSuppressed = false;
+      }
+      if (!autoSuppressed && activeRoomTile === null && !panelIsOffline) {
+        showOfflineNotice();
+      }
     } else {
       lastBreakKey = null;
       autoSuppressed = false;
       if (panelIsBreakPreview) collapseRoomPanel();
+      if (panelIsOffline) { panelIsOffline = false; closePanelRaw(); }
     }
 
     syncLunchBarFocus();
@@ -1407,6 +1513,10 @@
       line.style.display = 'inline-flex';
       line.className = 'statusline on-break';
       text.textContent = status.type === 'lunch' ? '점심시간' : '쉬는시간';
+    } else if (status.type === 'offline') {
+      line.style.display = 'inline-flex';
+      line.className = 'statusline offline';
+      text.textContent = '오프라인';
     } else {
       line.style.display = 'none';
     }
