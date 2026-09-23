@@ -298,17 +298,12 @@
   }
   .calbtn:hover { background: var(--border); }
   .calbtn:active { transform: translateY(1px); }
-  /* 화면에는 안 보이지만(display:none이 아니어야 브라우저 기본 날짜 선택기가 정상 동작함)
-     레이아웃 공간은 차지하지 않도록 숨김 */
+  /* 화면에는 안 보이지만(display:none이면 showPicker()가 동작하지 않는 브라우저가 있어서
+     visibility:hidden만 사용) 레이아웃 공간은 차지하지 않도록 숨김 */
   .calpick-hidden {
     position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    border: 0;
-    opacity: 0;
-    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .feed { padding: 8px 12px 20px; min-height: 120px; }
@@ -638,11 +633,14 @@
               <div class="datenav">
                 <button class="navbtn" id="prevBtn" type="button">&lsaquo; 이전</button>
                 <span class="datelabel" id="dateLabel">-</span>
-                <!-- input[type=date]는 눈에 안 보이게 숨기고, label로 감싼 달력 이모지를 눌렀을 때
-                     그 label-for 연결을 통해 브라우저 기본 날짜 선택기가 뜨도록 함. 직접 만든
-                     달력 팝업 대신 이렇게 하면 월/연도 이동, 큰 범위 점프(예: 몇 달 전으로) 같은
-                     처리를 전부 각 브라우저(사파리/크롬)의 검증된 기본 UI에 맡길 수 있음 -->
-                <label class="calbtn" for="calPick" title="날짜 선택" aria-label="날짜 선택">📅</label>
+                <!-- input[type=date]는 눈에 안 보이게 숨겨두고, 달력 이모지 버튼을 누르면 JS로
+                     그 input의 showPicker()를 직접 호출해서 브라우저 기본 날짜 선택기를 띄움.
+                     (label[for] 클릭으로 위임하는 방식은 모바일 사파리에선 되는데, 데스크톱
+                     크롬처럼 숨겨진 input의 크기가 0에 가까우면 안 뜨는 경우가 있어서, 더
+                     확실하게 동작하는 showPicker() 직접 호출로 바꿈) 직접 만든 달력 팝업 대신
+                     이렇게 하면 월/연도 이동, 큰 범위 점프(예: 몇 달 전으로) 같은 처리를 전부
+                     각 브라우저(사파리/크롬)의 검증된 기본 UI에 맡길 수 있음 -->
+                <button type="button" class="calbtn" id="calBtn" title="날짜 선택" aria-label="날짜 선택">📅</button>
                 <input type="date" id="calPick" class="calpick-hidden" aria-hidden="true" tabindex="-1">
                 <button class="navbtn today" id="todayBtn" type="button">오늘</button>
                 <button class="navbtn" id="nextBtn" type="button">다음 &rsaquo;</button>
@@ -1030,6 +1028,7 @@
   var prevBtn = document.getElementById('prevBtn');
   var nextBtn = document.getElementById('nextBtn');
   var todayBtn = document.getElementById('todayBtn');
+  var calBtn = document.getElementById('calBtn');
   var calPick = document.getElementById('calPick');
 
   var current = todayKST();
@@ -1189,6 +1188,20 @@
     var parts = calPick.value.split('-');
     current = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     load();
+  });
+  // 숨겨둔 input[type=date]에게 showPicker()를 직접 시켜서 브라우저 기본 날짜 선택기를 띄움.
+  // 일부 구형 브라우저(예: 오래된 파이어폭스)는 showPicker() 자체가 없을 수 있어서, 그럴 땐
+  // 최소한 포커스라도 줘서 키보드로 날짜를 입력할 수 있는 기본 동작으로 대체함
+  calBtn.addEventListener('click', function () {
+    if (typeof calPick.showPicker === 'function') {
+      try {
+        calPick.showPicker();
+      } catch (e) {
+        calPick.focus();
+      }
+    } else {
+      calPick.focus();
+    }
   });
 
   // ── 시간표 탭 로직 ─────────────────────────────────────────
