@@ -753,38 +753,18 @@
     return (n < 10 ? '0' : '') + n;
   }
 
-  // 2026학년도 기준 학교가 쉬는 법정공휴일(대체공휴일 포함) 중 평일에 해당하는 날짜만 모음
-  // — 토·일요일은 아래 계산에서 요일만으로 이미 걸러지므로 여기 안 넣어도 됨. 방학 기간은
-  // 정해진 날짜 데이터가 없어 포함하지 않았고, 다음 학년도가 되면 이 목록을 새로 갱신해야 함
-  var SCHOOL_HOLIDAYS_2026 = [
-    '2026-01-01', // 신정
-    '2026-02-16', '2026-02-17', '2026-02-18', // 설날 연휴
-    '2026-03-02', // 삼일절 대체공휴일
-    '2026-05-05', // 어린이날
-    '2026-05-25', // 부처님오신날 대체공휴일
-    '2026-08-17', // 광복절 대체공휴일
-    '2026-09-24', '2026-09-25', // 추석 연휴 (9/26은 토요일이라 요일 계산에서 이미 제외됨)
-    '2026-10-05', // 개천절 대체공휴일
-    '2026-10-09', // 한글날
-    '2026-12-25'  // 크리스마스
-  ];
-  var SCHOOL_HOLIDAY_SET = {};
-  SCHOOL_HOLIDAYS_2026.forEach(function (d) { SCHOOL_HOLIDAY_SET[d] = true; });
-  function isSchoolHoliday(y, mo, d) {
-    return !!SCHOOL_HOLIDAY_SET[y + '-' + pad2(mo) + '-' + pad2(d)];
-  }
-
   // 자정부터 새벽 5시까지는 '오늘 등교 전'이라기보다 '어젯밤의 연장'에 가까워서(아직 안
   // 자고 있거나 막 잠든 시간대), 이 시간대는 등교 전 문구 대신 하교 후 문구를 그대로 보여줌
   var EARLY_MORNING_CUTOFF_MIN = 5 * 60; // 05:00
 
-  // 지금 오프라인 상태인 '이유'를 하나 고름. 주말·공휴일은 시간과 무관하게 그 자체가
-  // 이유가 되고, 그 외(평일)에는 아직 등교 전인지 이미 하교했는지를 시계로 구분함
+  // 지금 오프라인 상태인 '이유'를 하나 고름. 주말은 시간과 무관하게 그 자체가 이유가 되고,
+  // 평일에는 아직 등교 전인지 이미 하교했는지를 시계로 구분함. 공휴일은 별도로 감지하지
+  // 않음(평일 공휴일엔 평소처럼 등교 전/하교 후 문구가 뜸) — 감지하려면 연도별 날짜 목록을
+  // 계속 손으로 갱신해야 하는 부담이 있어서 뺐음
   function offlineReason() {
     var t = todayKST();
     var dow = t.getDay();
     if (dow === 0 || dow === 6) return 'weekend';
-    if (isSchoolHoliday(t.getFullYear(), t.getMonth() + 1, t.getDate())) return 'holiday';
     var dayIdx = dow - 1;
     var now = nowKSTMinutes();
     if (now < EARLY_MORNING_CUTOFF_MIN) return 'after';
@@ -797,8 +777,7 @@
   var OFFLINE_MESSAGES = {
     before: '아직 등교 시간 전이에요. 천천히 준비해요! 🌅',
     after: '학교 수업이 모두 끝났어요. 수고했어요! 🏠',
-    weekend: '오늘은 주말이에요. 편히 쉬세요! 🏠',
-    holiday: '오늘은 공휴일이에요. 편히 쉬세요! 🏠'
+    weekend: '오늘은 주말이에요. 편히 쉬세요! 🏠'
   };
 
   // ── 반짝임("숨쉬기") 렌더러 ──────────────────────────────────
@@ -1430,14 +1409,8 @@
 
   function renderTimetable() {
     var grid = document.getElementById('ttGrid');
-    var todayDate = todayKST();
-    var dow = todayDate.getDay(); // 0=일 .. 6=토
-    // 평일이어도 공휴일이면 '오늘'로 취급하지 않음 — todayIdxCache가 -1이 되면 아래
-    // today 강조 표시뿐 아니라 getCurrentPeriodStatus(dayIdx<0) 경로를 그대로 타고
-    // 넘어가서 offline 처리, 현재 교시 글로우 등 '오늘' 관련 로직 전부가 자동으로
-    // 주말과 동일하게 "학교에 있는 시간이 아님"으로 취급됨
-    var isTodayHoliday = isSchoolHoliday(todayDate.getFullYear(), todayDate.getMonth() + 1, todayDate.getDate());
-    var todayIdx = (dow >= 1 && dow <= 5 && !isTodayHoliday) ? dow - 1 : -1;
+    var dow = todayKST().getDay(); // 0=일 .. 6=토
+    var todayIdx = (dow >= 1 && dow <= 5) ? dow - 1 : -1;
     todayIdxCache = todayIdx;
 
     var maxPeriods = 0;
