@@ -24,22 +24,20 @@
     --amber: #ffa657;
     --mint: #7ee787;
     --blue: #79c0ff;
-    --blue-strong: #2f8fe0;
+    /* 이동수업 타일 테두리: 다크모드에서는 평소엔 어두운 파란색으로 은은하게, 커서를
+       올리면 밝은 파란색으로 튀게 — 라이트모드와는 반대 방향 (아래 두 블록 참고) */
+    --tile-move-border: #2c5a86;
+    --tile-move-border-hover: #79c0ff;
     --pink: #ff7b9c;
     --tile-bg: rgba(255,255,255,0.065);
     --tile-bg-alt: rgba(255,255,255,0.13);
     --tile-bg-lite: rgba(255,255,255,0.09);
     --tile-bg-lite-alt: rgba(255,255,255,0.17);
-    --tile-bg-today: rgba(126,231,135,0.1);
-    --tile-bg-today-alt: rgba(126,231,135,0.18);
-    --tile-bg-today-lite: rgba(126,231,135,0.1);
-    --tile-bg-today-lite-alt: rgba(126,231,135,0.13);
     --tile-border: #3d4a63;
     --today-head-bg: rgba(126,231,135,0.34);
     --today-head-text: #d6ffdf;
     --today-head-border: rgba(126,231,135,0.6);
     --tile-selected-bg: rgba(255,123,156,0.24);
-    --tile-selected-today-bg: rgba(126,231,135,0.4);
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -54,16 +52,14 @@
       --tile-bg-alt: #f1f3f6;
       --tile-bg-lite: #ffffff;
       --tile-bg-lite-alt: #f7f9fb;
-      --tile-bg-today: rgba(31,139,66,0.12);
-      --tile-bg-today-alt: rgba(31,139,66,0.22);
-      --tile-bg-today-lite: rgba(31,139,66,0.12);
-      --tile-bg-today-lite-alt: rgba(31,139,66,0.16);
       --tile-border: #c4ccd6;
       --today-head-bg: rgba(31,139,66,0.24);
       --today-head-text: #0b4a24;
       --today-head-border: rgba(31,139,66,0.55);
       --tile-selected-bg: rgba(255,90,130,0.16);
-      --tile-selected-today-bg: rgba(31,139,66,0.32);
+      /* 라이트모드는 반대로: 평소엔 밝은 파란색, 커서를 올리면 진한 파란색으로 */
+      --tile-move-border: #6aa9e8;
+      --tile-move-border-hover: #1f5fad;
     }
   }
   :root[data-theme="dark"] {
@@ -75,16 +71,13 @@
     --tile-bg-alt: rgba(255,255,255,0.13);
     --tile-bg-lite: rgba(255,255,255,0.09);
     --tile-bg-lite-alt: rgba(255,255,255,0.17);
-    --tile-bg-today: rgba(126,231,135,0.1);
-    --tile-bg-today-alt: rgba(126,231,135,0.18);
-    --tile-bg-today-lite: rgba(126,231,135,0.1);
-    --tile-bg-today-lite-alt: rgba(126,231,135,0.13);
     --tile-border: #3d4a63;
     --today-head-bg: rgba(126,231,135,0.34);
     --today-head-text: #d6ffdf;
     --today-head-border: rgba(126,231,135,0.6);
     --tile-selected-bg: rgba(255,123,156,0.24);
-    --tile-selected-today-bg: rgba(126,231,135,0.4);
+    --tile-move-border: #2c5a86;
+    --tile-move-border-hover: #79c0ff;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -180,11 +173,8 @@
   .tabchip.active .ext { opacity: 1; }
   .tabchip.active .favdot {
     background: rgb(var(--dot-rgb));
-    animation: favTwinkle 1.8s ease-in-out infinite;
-  }
-  @keyframes favTwinkle {
-    0%, 100% { opacity: 0.6; transform: scale(0.8); box-shadow: 0 0 0 0 rgba(var(--dot-rgb), 0.5); }
-    50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 6px 2px rgba(var(--dot-rgb), 0.6); }
+    /* opacity/transform/box-shadow(반짝임)는 JS의 공용 glow 루프가 매 프레임 직접 그림 —
+       이유는 아래 GLOW_EPOCH 주석 참고 */
   }
 
   /* ── 슬라이드 전환 패널 ───────────────────────────────── */
@@ -243,7 +233,6 @@
     border-radius: 50%;
     flex-shrink: 0;
     background: rgb(var(--dot-rgb));
-    animation: favTwinkle 1.8s ease-in-out infinite;
   }
   .statusline.on-class { --dot-rgb: 126,231,135; }
   .statusline.on-break { --dot-rgb: 255,123,156; }
@@ -402,11 +391,8 @@
     border-radius: 5px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  .tt-period.now-glow { animation: nowGlowPeriod 1.8s ease-in-out infinite; }
-  @keyframes nowGlowPeriod {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,166,87,0.45); border-color: rgba(255,166,87,0.6); }
-    50% { box-shadow: 0 0 9px 2px rgba(255,166,87,0.55); border-color: rgba(255,166,87,0.95); }
-  }
+  /* .tt-period.now-glow의 반짝임(border-color/box-shadow)은 JS의 공용 glow 루프가
+     매 프레임 직접 그림 — 아래 GLOW_EPOCH 주석 참고 */
 
   .tile {
     appearance: none;
@@ -431,35 +417,21 @@
     transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   }
   .tile:hover { background: var(--tab-active-bg); border-color: var(--muted); }
-  .tile.move { border-color: var(--blue); }
-  .tile.move:hover { border-color: var(--blue-strong); }
+  .tile.move { border-color: var(--tile-move-border); }
+  .tile.move:hover { border-color: var(--tile-move-border-hover); }
   .tt-lunchbar { font-weight: 700; letter-spacing: 0.04em; }
 
-  /* 현재 시간에 해당하는 타일: 주황색 반짝임 (선택 색과 구분) */
-  .tile.now-glow { animation: nowGlow 1.8s ease-in-out infinite; }
-  @keyframes nowGlow {
-    0%, 100% { box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), 0 0 0 0 rgba(255,166,87,0.45); border-color: rgba(255,166,87,0.6); }
-    50% { box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), 0 0 9px 2px rgba(255,166,87,0.55); border-color: rgba(255,166,87,0.95); }
-  }
+  /* 현재 시간에 해당하는 타일: 주황색 반짝임 (선택 색과 구분).
+     점심시간 바가 포커스(lunch-focus)일 때는 배경까지 같이 물들고, 포커스를 잃으면
+     테두리만 계속 반짝이며 내부 배경은 하얀색으로 돌아감 — 이 두 경우 모두 포함해서
+     JS의 공용 glow 루프가 box-shadow/border-color(/lunch-focus일 땐 background)를
+     매 프레임 직접 그림. 아래 GLOW_EPOCH 주석 참고 */
 
-  /* 점심시간 바는 자기 자신이 부가정보로 열려있을 때만(lunch-focus) 테두리뿐 아니라 배경도
-     함께 주황빛으로 물듦. 다른 타일을 눌러 포커스가 옮겨가면 테두리만 계속 반짝이고
-     내부 배경은(하얀 타일이므로) 그대로 하얀색을 유지함 */
-  .tt-lunchbar.now-glow.lunch-focus { animation: nowGlowLunchBar 1.8s ease-in-out infinite; }
-  @keyframes nowGlowLunchBar {
-    0%, 100% { background: rgba(255,166,87,0.22); box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), 0 0 0 0 rgba(255,166,87,0.45); border-color: rgba(255,166,87,0.6); }
-    50% { background: rgba(255,166,87,0.4); box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), 0 0 9px 2px rgba(255,166,87,0.55); border-color: rgba(255,166,87,0.95); }
-  }
-
-  /* 선택된 타일: 요일과 상관없이 항상 핑크 계열 */
+  /* 선택된 타일: 요일과 상관없이 항상 핑크 계열. 반짝임(border-color/box-shadow)은
+     역시 JS의 공용 glow 루프가 그림 */
   .tile.selected {
     background: var(--tile-selected-bg);
     color: var(--text);
-    animation: tileGlowPink 1.8s ease-in-out infinite;
-  }
-  @keyframes tileGlowPink {
-    0%, 100% { box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), 0 0 0 0 rgba(255,90,150,0.45); border-color: rgba(255,90,150,0.65); }
-    50% { box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), 0 0 9px 2px rgba(255,90,150,0.55); border-color: rgba(255,90,150,0.95); }
   }
 
   .tt-roominfo {
@@ -742,25 +714,135 @@
     return (n < 10 ? '0' : '') + n;
   }
 
-  // 모든 "반짝임(숨쉬기)" 애니메이션의 공통 기준 시각. 타일마다 선택/해제된 시점이 달라도
-  // 이 기준으로 음수 animation-delay를 걸어주면 항상 같은 박자로 맞춰짐
+  // ── 반짝임("숨쉬기") 렌더러 ──────────────────────────────────
   //
-  // syncGlow는 반드시 "그 애니메이션이 실제로 시작/재시작되는 바로 그 순간"의 시각으로
-  // 계산해야 함. 그런데 타일을 막 선택했을 때는 부가정보 패널을 펼치는 height 트랜지션
-  // (0.4s, 레이아웃을 매 프레임 다시 계산해야 하는 무거운 애니메이션)이 같은 틱에서 같이
-  // 시작되는데, 이때 Safari에서 메인 스레드가 그 트랜지션 처리로 바빠서 새로 시작하는
-  // CSS 애니메이션의 "첫 페인트"가 실제로는 몇백 ms 뒤로 밀리는 경우가 있음 — 그런데
-  // syncGlow가 그걸 모르고 "지금(=클릭한 그 순간)" 기준으로 delay를 계산해버리면, 실제
-  // 애니메이션이 그려지는 시점과 계산 기준 시점이 어긋나서 다른 타일들과 박자가 밀려 보임.
-  // requestAnimationFrame으로 한 번 미뤄서, 브라우저가 실제로 다음 페인트를 준비하는
-  // 바로 그 타이밍에 맞춰 Date.now()를 읽으면 이 지연분이 자동으로 상쇄됨.
+  // 예전엔 CSS @keyframes + animation-delay로 각 요소가 "따로" 반짝이게 하고, 요소가
+  // selected/now-glow 등으로 바뀔 때마다 JS가 그 요소의 delay를 다시 계산해서 맞춰주는
+  // 방식이었음. 그런데 이 방식은 근본적으로 "그 애니메이션이 브라우저 안에서 실제로
+  // 시작/재시작되는 바로 그 순간"에 정확히 맞춰 delay를 계산해야만 동작하는데, 실제로는:
+  //   - 같은 셀렉터 우선순위 경쟁으로 animation이 다른 걸로 "바뀌는" 순간 (selected 해제 등)
+  //   - 부가정보 패널이 펼쳐지는 무거운 height 트랜지션과 겹치는 순간
+  //   - 페이지 로드 직후 여러 초기화 작업이 겹치는 순간
+  //   - 탭을 백그라운드에 뒀다 돌아오는 순간
+  // 등등 온갖 타이밍에 이 "정확히 그 순간"을 보장하기가 어려웠고, 특히 Safari에서는
+  // 브라우저가 실제로 그 애니메이션의 첫 프레임을 언제 그리는지가 JS가 기대한 시점과
+  // 미묘하게 어긋나서, 타일마다 따로 놀아 보이는 문제가 계속 재발했음.
+  //
+  // 그래서 아예 "언제 시작됐는지"를 신경 쓸 필요가 없는 방식으로 바꿈: CSS 애니메이션을
+  // 전혀 쓰지 않고, requestAnimationFrame 루프 하나가 매 프레임마다 "지금이 전체 주기의
+  // 몇 %냐"를 계산해서, 그 순간 반짝여야 하는 모든 요소(교시 숫자, 과목 타일, 점심시간
+  // 바, 선택된 타일, 탭 아이콘, 상태줄 점)에 같은 값으로 직접 스타일을 찍어줌. 전부 같은
+  // 한 번의 계산 결과를 공유하니 "언제 눌렀는지/언제부터 반짝였는지"가 결과에 전혀
+  // 영향을 못 주고, 항상 완벽히 같은 박자로 맞음.
   var GLOW_EPOCH = Date.now();
   var GLOW_DURATION_MS = 1800;
-  function syncGlow(el) {
-    requestAnimationFrame(function () {
-      var offset = (Date.now() - GLOW_EPOCH) % GLOW_DURATION_MS;
-      el.style.animationDelay = (-offset / 1000) + 's';
+
+  // 0(시작/끝, 어두움) ~ 1(정중앙, 가장 밝음) ~ 0 을 부드럽게 오가는 값.
+  // CSS의 "0%,100% 어두움 / 50% 밝음, ease-in-out" 키프레임과 같은 모양의 곡선(코사인)
+  function glowIntensity(nowMs) {
+    var t = ((nowMs - GLOW_EPOCH) % GLOW_DURATION_MS + GLOW_DURATION_MS) % GLOW_DURATION_MS;
+    return (1 - Math.cos((t / GLOW_DURATION_MS) * Math.PI * 2)) / 2;
+  }
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  var GLOW_STATIC_SHADOW = '0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35), ';
+
+  // 매 프레임 지난번에 반짝이던 요소 목록을 기억해뒀다가, 이번 프레임에 더 이상
+  // 해당하지 않는 요소는 인라인 스타일을 지워서 평소 CSS 값으로 되돌림
+  var prevGlowingTiles = [];
+  var prevGlowingDots = [];
+
+  function renderGlowFrame() {
+    var i = glowIntensity(Date.now());
+
+    var amberBoxOp = lerp(0.45, 0.55, i);
+    var amberBlur = lerp(0, 9, i);
+    var amberSpread = lerp(0, 2, i);
+    var amberBorderOp = lerp(0.6, 0.95, i);
+    var amberBoxTail = '0 0 ' + amberBlur.toFixed(2) + 'px ' + amberSpread.toFixed(2) + 'px rgba(255,166,87,' + amberBoxOp.toFixed(3) + ')';
+    var amberBorder = 'rgba(255,166,87,' + amberBorderOp.toFixed(3) + ')';
+
+    var pinkBoxOp = lerp(0.45, 0.55, i);
+    var pinkBlur = lerp(0, 9, i);
+    var pinkSpread = lerp(0, 2, i);
+    var pinkBorderOp = lerp(0.65, 0.95, i);
+    var pinkBoxTail = '0 0 ' + pinkBlur.toFixed(2) + 'px ' + pinkSpread.toFixed(2) + 'px rgba(255,90,150,' + pinkBoxOp.toFixed(3) + ')';
+    var pinkBorder = 'rgba(255,90,150,' + pinkBorderOp.toFixed(3) + ')';
+
+    var lunchBg = 'rgba(255,166,87,' + lerp(0.22, 0.4, i).toFixed(3) + ')';
+
+    var curGlowingTiles = [];
+
+    // 왼쪽 교시 숫자 타일 (카드 그림자 레이어 없이 반짝임 레이어만)
+    document.querySelectorAll('.tt-period.now-glow').forEach(function (el) {
+      el.style.boxShadow = amberBoxTail;
+      el.style.borderColor = amberBorder;
+      curGlowingTiles.push(el);
     });
+
+    // 과목/점심시간 타일: now-glow(주황) — 단, 선택되어 핑크인 타일은 아래에서 따로 처리
+    document.querySelectorAll('.tile.now-glow:not(.selected)').forEach(function (el) {
+      var isLunchFocus = el.classList.contains('lunch-focus');
+      el.style.boxShadow = GLOW_STATIC_SHADOW + amberBoxTail;
+      el.style.borderColor = amberBorder;
+      el.style.background = isLunchFocus ? lunchBg : '';
+      curGlowingTiles.push(el);
+    });
+
+    // 선택된(핑크) 타일 — now-glow 여부와 무관하게 항상 핑크
+    document.querySelectorAll('.tile.selected').forEach(function (el) {
+      el.style.boxShadow = GLOW_STATIC_SHADOW + pinkBoxTail;
+      el.style.borderColor = pinkBorder;
+      curGlowingTiles.push(el);
+    });
+
+    prevGlowingTiles.forEach(function (el) {
+      if (curGlowingTiles.indexOf(el) === -1) {
+        el.style.boxShadow = '';
+        el.style.borderColor = '';
+        el.style.background = '';
+      }
+    });
+    prevGlowingTiles = curGlowingTiles;
+
+    // 탭 아이콘의 반짝이는 점 + 상태줄 점 (favTwinkle과 같은 모양)
+    var dotOpacity = lerp(0.6, 1, i);
+    var dotScale = lerp(0.8, 1.25, i);
+    var dotBlur = lerp(0, 6, i);
+    var dotSpread = lerp(0, 2, i);
+    var dotBoxOp = lerp(0.5, 0.6, i);
+    var dotBoxShadow = '0 0 ' + dotBlur.toFixed(2) + 'px ' + dotSpread.toFixed(2) + 'px rgba(var(--dot-rgb),' + dotBoxOp.toFixed(3) + ')';
+
+    var curGlowingDots = [];
+    var activeBtn = tabButtons[activeTabIndex];
+    var activeFavdot = activeBtn && activeBtn.querySelector('.favdot');
+    if (activeFavdot) {
+      activeFavdot.style.opacity = dotOpacity;
+      activeFavdot.style.transform = 'scale(' + dotScale.toFixed(3) + ')';
+      activeFavdot.style.boxShadow = dotBoxShadow;
+      curGlowingDots.push(activeFavdot);
+    }
+    var statusLineEl = document.getElementById('statusLine');
+    if (statusLineEl && statusLineEl.style.display !== 'none') {
+      var statusDot = statusLineEl.querySelector('.statusdot');
+      if (statusDot) {
+        statusDot.style.opacity = dotOpacity;
+        statusDot.style.transform = 'scale(' + dotScale.toFixed(3) + ')';
+        statusDot.style.boxShadow = dotBoxShadow;
+        curGlowingDots.push(statusDot);
+      }
+    }
+    prevGlowingDots.forEach(function (el) {
+      if (curGlowingDots.indexOf(el) === -1) {
+        el.style.opacity = '';
+        el.style.transform = '';
+        el.style.boxShadow = '';
+      }
+    });
+    prevGlowingDots = curGlowingDots;
+
+    requestAnimationFrame(renderGlowFrame);
   }
 
   // 지금 진행 중인 교시 / 쉬는시간(다음 교시 예고) 상태를 계산
@@ -798,15 +880,6 @@
     }
   }
 
-  // 탭 아이콘의 반짝이는 점(favdot)도 다른 숨쉬기 애니메이션과 같은 박자를 타야 하는데,
-  // 탭을 전환할 때마다 active 클래스가 새로 붙으면서 애니메이션이 delay 0부터 다시 시작해
-  // 싱크가 깨지고 있었음. 탭이 active가 될 때마다 syncGlow로 다시 맞춰줌
-  function syncActiveFavdot() {
-    var btn = tabButtons[activeTabIndex];
-    var dot = btn && btn.querySelector('.favdot');
-    if (dot) syncGlow(dot);
-  }
-
   function switchTab(index) {
     if (index === activeTabIndex) return;
     activeTabIndex = index;
@@ -814,7 +887,6 @@
     panes.forEach(function (pane, i) { pane.classList.toggle('active', i === index); });
     track.style.transform = 'translateX(' + (index === 0 ? '0%' : '-50%') + ')';
     setViewportHeight(index, true);
-    syncActiveFavdot();
   }
 
   function syncHeightIfActive(index) {
@@ -1028,16 +1100,11 @@
     el.textContent = pad2(m) + ':' + pad2(s);
   }
 
-  // 타일이 'selected'(핑크) 클래스를 잃으면, 그 타일에 'now-glow'가 남아있는 경우
-  // 실제로 적용되는 애니메이션이 tileGlowPink → nowGlow(또는 nowGlowLunchBar)로 "바뀌면서"
-  // 새 애니메이션이 처음부터 다시 시작됨. 이때 animationDelay를 그대로 두면(핑크였을 때
-  // 계산된 옛날 시점 기준 값이라) 다른 타일들과 박자가 어긋나 보임 — 이게 "여러 타일을
-  // 눌렀다 보면 숨쉬기가 안 맞는다"는 문제의 원인이었음. 클래스를 뗄 때마다 그 즉시
-  // 다시 맞춰주면 해결됨
+  // 타일이 'selected'(핑크) 클래스를 잃으면 반짝임은 renderGlowFrame이 매 프레임 알아서
+  // 다시 그려주므로(더 이상 별도로 맞춰줄 게 없음) 그냥 클래스만 떼면 됨
   function deselectTile(el) {
     if (!el) return;
     el.classList.remove('selected');
-    if (el.classList.contains('now-glow')) syncGlow(el);
   }
 
   // 점심시간 바가 지금 "포커스"(부가정보에 실제로 표시되고 있는) 상태인지에 따라
@@ -1045,12 +1112,8 @@
   function syncLunchBarFocus() {
     var bar = document.getElementById('ttLunchBar');
     if (!bar) return;
-    var wasFocused = bar.classList.contains('lunch-focus');
     var isFocused = activeRoomTile === bar && !bar.classList.contains('selected');
     bar.classList.toggle('lunch-focus', isFocused);
-    // lunch-focus가 꺼지면 nowGlowLunchBar → nowGlow로 애니메이션이 바뀌어 다시 시작되므로,
-    // (위 deselectTile과 같은 이유로) 이 시점 기준으로 다시 맞춰줌
-    if (wasFocused && !isFocused && bar.classList.contains('now-glow')) syncGlow(bar);
   }
 
   function collapseRoomPanel() {
@@ -1059,12 +1122,15 @@
     deselectTile(activeRoomTile);
     activeRoomTile = null;
 
-    // 점심시간에는 부가정보를 완전히 닫지 않고, 점심시간 바 정보로 되돌아감
-    // (타일 자체의 선택/해제는 되지만, 패널은 계속 떠 있어야 함)
-    if (getCurrentPeriodStatus().type === 'lunch') {
-      var lunchBar = document.getElementById('ttLunchBar');
-      if (lunchBar) {
-        selectRoomTile(lunchBar, true);
+    // 쉬는시간·점심시간에는 부가정보를 완전히 닫지 않고, 그 시간의 안내 정보로 되돌아감
+    // (타일 자체의 선택/해제는 항상 되지만, 패널은 남은 시간이 0이 될 때까지 계속 떠 있어야 함)
+    var status = getCurrentPeriodStatus();
+    if (status.type === 'lunch' || status.type === 'break') {
+      var fallbackTile = status.type === 'lunch'
+        ? document.getElementById('ttLunchBar')
+        : findTileForPeriod(todayIdxCache, status.periodIndex);
+      if (fallbackTile) {
+        selectRoomTile(fallbackTile, true);
         return;
       }
     }
@@ -1144,7 +1210,6 @@
     deselectTile(activeRoomTile);
     if (!isAuto) {
       tile.classList.add('selected');
-      syncGlow(tile);
     }
     activeRoomTile = tile;
     syncLunchBarFocus();
@@ -1163,22 +1228,15 @@
 
   // 타일의 배경을 계산: 교시(0-index) 홀/짝으로 번갈아가는 색 (1교시는 하양, 2교시는 회색 ...),
   // 2교시 이상 걸치는 큰 타일은 위/아래 색을 부드러운 그라데이션으로 자연스럽게 이어줌.
-  // 이동수업 여부와 상관없이 배경은 기존 하양/회색(또는 오늘 요일이면 초록 계열) 규칙을 그대로 따름 —
-  // 이동수업 구분은 배경이 아니라 .tile.move의 테두리색으로만 표시함 (글자는 일반 과목과 동일).
-  // useLite는 "작은(1교시짜리) 타일만 더 연한 색을 쓴다"는 조건 — 회색/초록색 둘 다 해당되고,
-  // 그라데이션이 있는 큰 타일에는 적용되지 않음 (그래야 작은 타일의 단일 색이 그라데이션보다
-  // 진하게 보이는 착시가 안 생김)
-  function segBackground(isToday, start, span, useLite) {
+  // 오늘 요일 강조(초록색)는 맨 위 요일 헤더에만 적용하고, 과목 타일 자체는 요일과 상관없이
+  // 항상 이 회색/하양 규칙을 그대로 따름 — 이동수업 구분도 배경이 아니라 .tile.move의
+  // 테두리색으로만 표시함 (글자는 일반 과목과 동일).
+  // useLite는 "작은(1교시짜리) 타일만 더 연한 색을 쓴다"는 조건 — 그라데이션이 있는 큰
+  // 타일에는 적용되지 않음 (그래야 작은 타일의 단일 색이 그라데이션보다 진하게 보이는
+  // 착시가 안 생김)
+  function segBackground(start, span, useLite) {
     var baseTok, altTok;
-    if (isToday) {
-      if (useLite && span <= 1) {
-        baseTok = '--tile-bg-today-lite';
-        altTok = '--tile-bg-today-lite-alt';
-      } else {
-        baseTok = '--tile-bg-today';
-        altTok = '--tile-bg-today-alt';
-      }
-    } else if (useLite && span <= 1) {
+    if (useLite && span <= 1) {
       baseTok = '--tile-bg-lite';
       altTok = '--tile-bg-lite-alt';
     } else {
@@ -1216,7 +1274,7 @@
     });
 
     for (var p = 0; p < maxPeriods; p++) {
-      var pBg = segBackground(false, p, 1, false);
+      var pBg = segBackground(p, 1, false);
       html += '<div class="tt-period" data-period-index="' + p + '" style="grid-column:1;grid-row:' + gridRowForPeriod(p) + ';--seg-bg:' + pBg + ';">' + (p + 1) + '</div>';
     }
 
@@ -1226,7 +1284,8 @@
       ' style="grid-column:1 / span 6;grid-row:' + LUNCH_GRID_ROW + ';--seg-bg:var(' + lunchTok + ');">점심시간</div>';
 
     TIMETABLE.keys.forEach(function (key, d) {
-      var isToday = d === todayIdx;
+      // 오늘 요일 강조(초록색)는 맨 위 요일 헤더(.ttcol-head.today)에만 적용하고,
+      // 과목 타일 자체는 요일에 상관없이 다른 타일들과 똑같은 회색/하양 줄무늬로 통일함
       var segs = buildDayPlan(TIMETABLE.periods[key]);
 
       segs.forEach(function (seg) {
@@ -1236,10 +1295,10 @@
         var room = ROOM_INFO[seg.val] || DEFAULT_ROOM;
         var rowStart = gridRowForPeriod(seg.start);
         var isMove = isMovingClass(seg.val);
-        var bg = segBackground(isToday, seg.start, seg.span, true);
+        var bg = segBackground(seg.start, seg.span, true);
         var moveClass = isMove ? ' move' : '';
 
-        html += '<div class="tile' + (isToday ? ' is-today' : '') + moveClass + '" style="grid-column:' + (d + 2) + ';grid-row:' + rowStart + ' / span ' + seg.span + ';--seg-bg:' + bg + ';"' +
+        html += '<div class="tile' + moveClass + '" style="grid-column:' + (d + 2) + ';grid-row:' + rowStart + ' / span ' + seg.span + ';--seg-bg:' + bg + ';"' +
           ' data-day="' + d + '" data-p-start="' + seg.start + '" data-p-span="' + seg.span + '"' +
           ' data-period="' + escAttr(periodLabel) + '" data-subject="' + escAttr(seg.val) + '" data-room="' + escAttr(room) + '">' +
           seg.val + '</div>';
@@ -1286,14 +1345,14 @@
     if (status.type === 'lunch') {
       // 점심시간에는 5교시 타일 대신 점심시간 바 전체가 반짝임
       var lunchBar = document.getElementById('ttLunchBar');
-      if (lunchBar) { lunchBar.classList.add('now-glow'); syncGlow(lunchBar); }
+      if (lunchBar) { lunchBar.classList.add('now-glow'); }
     } else if (status.periodIndex !== null) {
       var nowTile = findTileForPeriod(todayIdxCache, status.periodIndex);
-      if (nowTile) { nowTile.classList.add('now-glow'); syncGlow(nowTile); }
+      if (nowTile) { nowTile.classList.add('now-glow'); }
 
       if (status.type === 'class') {
         var periodEl = grid.querySelector('.tt-period[data-period-index="' + status.periodIndex + '"]');
-        if (periodEl) { periodEl.classList.add('now-glow'); syncGlow(periodEl); }
+        if (periodEl) { periodEl.classList.add('now-glow'); }
       }
     }
 
@@ -1317,7 +1376,6 @@
 
     syncLunchBarFocus();
     updateStatusLine(status);
-    syncActiveFavdot(); // 30초마다 탭 아이콘 반짝임도 같이 재동기화 (드리프트 방지)
   }
 
   // 헤더 아래 "수업 중 / 쉬는시간 · 점심시간" 실시간 표시줄
@@ -1340,32 +1398,18 @@
     }
 
     var nowVisible = line.style.display !== 'none';
-    if (nowVisible) syncGlow(line.querySelector('.statusdot'));
     if (wasVisible !== nowVisible) syncHeightIfActive(0);
   }
 
-  // 지금 반짝이고 있는 모든 요소(교시/타일의 주황 반짝임, 핑크로 선택된 타일, 상태줄 점,
-  // 활성 탭 아이콘)를 한 번에 GLOW_EPOCH 기준으로 다시 맞춤. 모바일에서 화면을 껐다 켜거나
-  // 다른 앱에 갔다 돌아오면 브라우저가 CSS 애니메이션 시계를 리셋해버려서 반짝임 박자와
-  // 속도가 서로 어긋나 보이는 경우가 있는데, 화면에 다시 돌아왔을 때 이걸로 바로잡음
-  function resyncAllGlow() {
-    document.querySelectorAll('.now-glow').forEach(syncGlow);
-    var selectedTile = document.querySelector('.tile.selected');
-    if (selectedTile) syncGlow(selectedTile);
-    var line = document.getElementById('statusLine');
-    if (line && line.style.display !== 'none') syncGlow(line.querySelector('.statusdot'));
-    syncActiveFavdot();
-  }
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible') resyncAllGlow();
-  });
-  window.addEventListener('pageshow', resyncAllGlow);
-  window.addEventListener('focus', resyncAllGlow);
+  // (예전엔 화면을 껐다 켜거나 다른 앱에 갔다 돌아왔을 때 CSS 애니메이션 시계가 리셋되는
+  // 문제가 있어 resyncAllGlow로 수동 재동기화했었는데, 이제는 renderGlowFrame이 매 프레임
+  // "지금" 기준으로 새로 그리기 때문에 탭이 백그라운드에서 돌아와도 다음 프레임에 저절로
+  // 맞음 — 별도 재동기화가 필요 없음)
 
   // ── 초기화 ─────────────────────────────────────────────────
   renderTimetable();
   applyNowGlow();
-  syncActiveFavdot();
+  requestAnimationFrame(renderGlowFrame);
   setInterval(applyNowGlow, 30000);
   load();
   setViewportHeight(0, false);
