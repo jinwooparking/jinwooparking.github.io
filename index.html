@@ -625,7 +625,6 @@
     </div>
 
     <div class="footer">
-      <span class="live">데이터 출처: 나이스(NEIS) 교육정보 개방 포털</span>
       <span class="src">제작 · 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></span>
     </div>
   </div>
@@ -777,65 +776,6 @@
     return !!SCHOOL_HOLIDAY_SET[y + '-' + pad2(mo) + '-' + pad2(d)];
   }
 
-  // 지금부터 "다음 수업"(다음 등교일의 1교시 08:40)까지 남은 초를 계산.
-  // 1교시는 모든 요일에 다 있어서(월~금 전부 TIMETABLE에 1교시 값이 있음) 그냥 "지금 이후의
-  // 가장 가까운 등교일 08:40"을 찾으면 됨 — 등교 전이면 오늘 08:40, 하교 후·주말·공휴일이면
-  // 그 다음 등교일 08:40으로 자연스럽게 넘어감 (요일별 하교 시각이 달라도 이 계산엔 영향 없음)
-  function computeNextClassRemainSec() {
-    var parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    }).formatToParts(new Date());
-    var y = 0, mo = 0, da = 0, h = 0, m = 0, s = 0;
-    parts.forEach(function (p) {
-      if (p.type === 'year') y = Number(p.value);
-      if (p.type === 'month') mo = Number(p.value);
-      if (p.type === 'day') da = Number(p.value);
-      if (p.type === 'hour') h = Number(p.value);
-      if (p.type === 'minute') m = Number(p.value);
-      if (p.type === 'second') s = Number(p.value);
-    });
-    var nowSecOfDay = h * 3600 + m * 60 + s;
-    var firstPeriodSec = PERIOD_TIMES[0][0] * 60; // 08:40
-    // new Date(y, mo-1, da)는 달력 계산(요일 구하기·날짜 더하기) 전용으로만 씀 — KST
-    // 연/월/일을 그대로 넣은 것이라 시:분:초나 실제 시각(epoch)은 의미 없고, 보는 사람의
-    // 로컬 타임존과 무관하게 "그 달력 날짜의 요일"은 항상 같으므로 이렇게 써도 안전함
-    var todayLocal = new Date(y, mo - 1, da);
-    function isSkipDay(daysAhead) {
-      var cand = new Date(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate() + daysAhead);
-      var cwd = cand.getDay();
-      if (cwd === 0 || cwd === 6) return true; // 주말
-      return isSchoolHoliday(cand.getFullYear(), cand.getMonth() + 1, cand.getDate());
-    }
-
-    var daysAhead = 0;
-    if (!isSkipDay(0) && nowSecOfDay < firstPeriodSec) {
-      daysAhead = 0; // 오늘 등교 전
-    } else {
-      daysAhead = 1;
-      while (isSkipDay(daysAhead)) daysAhead++;
-    }
-    return daysAhead * 86400 + firstPeriodSec - nowSecOfDay;
-  }
-
-  // 오프라인(등교 전/하교 후/주말) 안내에 쓰는 카운트다운 문구를 남은 시간 규모에 맞춰
-  // 다르게 포맷: 며칠 남았으면 일 단위부터, 하루 안이면 시간 단위부터, 한 시간 안이면
-  // 분·초만 표시
-  function formatOfflineCountdown(remainSec) {
-    if (remainSec < 0) remainSec = 0;
-    var days = Math.floor(remainSec / 86400);
-    var hours = Math.floor((remainSec % 86400) / 3600);
-    var minutes = Math.floor((remainSec % 3600) / 60);
-    var seconds = remainSec % 60;
-    if (days > 0) {
-      return pad2(days) + '일 ' + pad2(hours) + '시간 ' + pad2(minutes) + '분 ' + pad2(seconds) + '초';
-    }
-    if (hours > 0) {
-      return pad2(hours) + '시간 ' + pad2(minutes) + '분 ' + pad2(seconds) + '초';
-    }
-    return pad2(minutes) + '분 ' + pad2(seconds) + '초';
-  }
-
   // ── 반짝임("숨쉬기") 렌더러 ──────────────────────────────────
   //
   // 예전엔 CSS @keyframes + animation-delay로 각 요소가 "따로" 반짝이게 하고, 요소가
@@ -981,6 +921,11 @@
     }
     if (now < SCHOOL_START_MIN || now >= schoolEndMinForDay(dayIdx)) {
       return { type: 'offline', periodIndex: null };
+    }
+    // 08:30(등교 시각) ~ 08:40(1교시 시작) 사이는 아직 수업 시작 전이지만 이미 학교에
+    // 있을 시간이므로 '오프라인'이 아니라 '쉬는시간(1교시 예고)'으로 취급함
+    if (now < PERIOD_TIMES[0][0]) {
+      return { type: 'break', periodIndex: 0 };
     }
     var maxP = TIMETABLE.periods[TIMETABLE.keys[dayIdx]].length;
     for (var i = 0; i < PERIOD_TIMES.length; i++) {
@@ -1284,22 +1229,12 @@
     syncHeightIfActive(0);
   }
 
-  // 등교 전 · 하교 후 · 주말: 특정 타일과 연결되지 않은 순수 안내문을 같은 패널에 띄움
-  // (쉬는시간·점심시간 자동 안내와 같은 패턴이지만, 반짝이거나 선택 표시할 타일이 없음)
-  // 오프라인 안내 패널의 카운트다운 한 칸을 갱신. 남은 시간이 0 이하가 되면(=등교 시각
-  // 도달) applyNowGlow를 다시 돌려서 실제 상태(수업 중 등)로 자연스럽게 넘어가게 함
-  function tickOfflineCountdown() {
-    var el = document.getElementById('ttOfflineCountdown');
-    if (!el) { clearCountdownTimer(); return; }
-    var remainSec = computeNextClassRemainSec();
-    if (remainSec <= 0) {
-      clearCountdownTimer();
-      applyNowGlow();
-      return;
-    }
-    el.textContent = formatOfflineCountdown(remainSec);
-  }
-
+  // 등교 전 · 하교 후 · 주말 · 공휴일: 특정 타일과 연결되지 않은 순수 안내문을 같은 패널에
+  // 띄움 (쉬는시간·점심시간 자동 안내와 같은 패턴이지만, 반짝이거나 선택 표시할 타일이 없음).
+  // 예전엔 여기에도 "다음 수업까지 남은 시간" 카운트다운을 달았었는데, 공휴일까지 반영해서
+  // 계산하려니 목록을 해마다 손으로 갱신해야 하는 부담이 있어 — 이 방과후 안내에서는 카운트
+  // 다운 자체를 빼고 정적인 안내문만 보여줌. 쉬는시간·점심시간 카운트다운(tickCountdown)은
+  // 시간표 자체의 교시 시각만으로 계산돼서 공휴일과 무관하게 그대로 유지됨
   function showOfflineNotice() {
     clearCountdownTimer();
     deselectTile(activeRoomTile);
@@ -1309,13 +1244,7 @@
 
     var panel = document.getElementById('ttRoomInfo');
     var inner = document.getElementById('ttRoomInfoInner');
-    // 패널 높이를 재기 전에 실제 카운트다운 값부터 채워둠 — "00분 00초" 같은 자리표시자로
-    // 재고 나중에 진짜 값(예: "02일 13시간 20분 00초")으로 바뀌면 길이가 달라져 아래가
-    // 잘릴 수 있어서, 처음부터 실제 값으로 높이를 정확히 잼
-    var initialRemain = computeNextClassRemainSec();
-    inner.innerHTML = '<span class="roomnote offline">지금은 학교에 있을 시간이 아닙니다. 편히 쉬세요! 🏠</span>' +
-      '<span class="roomcountdown">⏳ 다음 수업까지 남은 시간 : <span id="ttOfflineCountdown">' +
-      formatOfflineCountdown(initialRemain) + '</span></span>';
+    inner.innerHTML = '<span class="roomnote offline">지금은 학교에 있을 시간이 아닙니다. 편히 쉬세요! 🏠</span>';
     var newH = panelNeededHeight(inner);
     panel.style.transition = 'none';
     panel.style.height = newH + 'px';
@@ -1324,8 +1253,6 @@
     panel.classList.add('open');
     syncLunchBarFocus();
     syncHeightIfActive(0);
-
-    countdownTimer = setInterval(tickOfflineCountdown, 1000);
   }
 
   function collapseRoomPanel() {
