@@ -511,26 +511,8 @@
     font-family: 'JetBrains Mono', 'IBM Plex Sans KR', monospace;
     font-size: 12px;
   }
-  .footer .live {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .footer .live::before {
-    content: "";
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--mint);
-    box-shadow: 0 0 0 0 rgba(126,231,135,0.6);
-    animation: twinkle 1.8s ease-in-out infinite;
-  }
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.5; transform: scale(0.8); box-shadow: 0 0 0 0 rgba(126,231,135,0.5); }
-    50% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 7px 2px rgba(126,231,135,0.6); }
-  }
-  .footer .src { display: block; margin-top: 4px; opacity: 0.7; }
-  .footer .src a { color: inherit; text-decoration: none; }
-  .footer .src a:hover { text-decoration: underline; }
+  .footer a { color: inherit; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
   @keyframes blink { 50% { opacity: 0; } }
   .cursor {
     display: inline-block;
@@ -621,9 +603,7 @@
       </div>
     </div>
 
-    <div class="footer">
-      <span class="src">제작 · 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></span>
-    </div>
+    <div class="footer">제작 · 박진우<a href="https://www.instagram.com/parkiinq/" target="_blank" title="인스타그램 프로필">(@parkiinq)</a></div>
   </div>
 
 <script>
@@ -1578,11 +1558,35 @@
   // "지금" 기준으로 새로 그리기 때문에 탭이 백그라운드에서 돌아와도 다음 프레임에 저절로
   // 맞음 — 별도 재동기화가 필요 없음)
 
+  // 오늘 날짜가 마지막으로 그렸을 때와 달라졌으면(자정을 넘겨 계속 켜져 있던 경우) 시간표를
+  // 통째로 다시 그려서 '오늘' 강조와 todayIdxCache를 새 날짜에 맞게 갱신함
+  var lastRenderedYmd = null;
+  function resyncLiveState() {
+    var y = ymd(todayKST());
+    if (y !== lastRenderedYmd) {
+      lastRenderedYmd = y;
+      renderTimetable();
+    }
+    applyNowGlow();
+  }
+
   // ── 초기화 ─────────────────────────────────────────────────
   renderTimetable();
+  lastRenderedYmd = ymd(todayKST());
   applyNowGlow();
   requestAnimationFrame(renderGlowFrame);
-  setInterval(applyNowGlow, 30000);
+  // 30초 간격이면 쉬는시간이 시작되는 바로 그 순간과 최대 30초 정도 어긋나 보일 수 있어서,
+  // 눈에 띄지 않을 정도로 짧게 줄임 (이 함수 자체가 가벼운 DOM 조회/비교라 5초 간격으로도
+  // 부담 없음)
+  setInterval(resyncLiveState, 5000);
+  // 브라우저 탭이 백그라운드에 있었거나(다른 앱 전환, 화면 꺼짐 등) 절전 모드로 타이머가
+  // 늦춰졌다가 돌아왔을 때, 다음 5초를 기다리지 않고 그 즉시 한 번 더 갱신해서 화면이
+  // "새로고침해야 반영되는" 것처럼 멈춰 보이는 걸 방지함
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') resyncLiveState();
+  });
+  window.addEventListener('focus', resyncLiveState);
+  window.addEventListener('pageshow', resyncLiveState);
   load();
   setViewportHeight(0, false);
 
