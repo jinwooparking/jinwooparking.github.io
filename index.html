@@ -38,6 +38,8 @@
     --today-head-text: #d6ffdf;
     --today-head-border: rgba(126,231,135,0.6);
     --tile-selected-bg: rgba(255,123,156,0.24);
+    /* 타일에 마우스를 올렸을 때 커서 위치를 따라다니는 은은한 스포트라이트 색 */
+    --tile-spot: rgba(121,192,255,0.4);
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -60,6 +62,8 @@
       /* 라이트모드는 반대로: 평소엔 밝은 파란색, 커서를 올리면 진한 파란색으로 */
       --tile-move-border: #6aa9e8;
       --tile-move-border-hover: #1f5fad;
+      /* 라이트모드 배경은 이미 밝아서 스포트라이트를 더 진하고 채도 있게 */
+      --tile-spot: rgba(31,95,173,0.22);
     }
   }
   :root[data-theme="dark"] {
@@ -78,6 +82,7 @@
     --tile-selected-bg: rgba(255,123,156,0.24);
     --tile-move-border: #2c5a86;
     --tile-move-border-hover: #79c0ff;
+    --tile-spot: rgba(121,192,255,0.4);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -429,9 +434,28 @@
     min-width: 0;
     word-break: keep-all;
     box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 2px 5px -2px rgba(0,0,0,0.35);
-    transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+      transform 0.22s cubic-bezier(0.22, 0.9, 0.3, 1.25);
+    /* 마우스를 올렸을 때 커서를 따라 기울어지는 입체감 + 스포트라이트 효과 (JS의
+       renderGlowFrame 루프가 매 프레임 --mx/--my/transform을 갱신함) */
+    position: relative;
+    overflow: hidden;
+    transform: perspective(520px) rotateX(0deg) rotateY(0deg) scale(1);
+    will-change: transform;
+  }
+  .tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(140px circle at var(--mx, 50%) var(--my, 50%), var(--tile-spot), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
   }
   .tile:hover { background: var(--tab-active-bg); border-color: var(--muted); }
+  .tile.tile-hover { z-index: 6; }
+  .tile.tile-hover::before { opacity: 1; }
   .tile.move { border-color: var(--tile-move-border); }
   .tile.move:hover { border-color: var(--tile-move-border-hover); }
   .tt-lunchbar { font-weight: 700; letter-spacing: 0.04em; }
@@ -798,8 +822,59 @@
   var prevGlowingTiles = [];
   var prevGlowingDots = [];
 
+  // 마우스를 올린 타일이 커서를 따라 기울어지고 스포트라이트가 따라다니는 효과.
+  // 별도 애니메이션 루프를 새로 만들지 않고, 이미 매 프레임 도는 renderGlowFrame
+  // 루프에 얹어서 처리함 (아래에서 hoverTile/hoverMouseX/Y만 갱신)
+  var hoverTile = null;
+  var hoverMouseX = 0;
+  var hoverMouseY = 0;
+  var TILE_MAX_TILT = 9; // deg
+  var TILE_HOVER_SCALE = 1.07;
+
+  function clearTileHover() {
+    if (hoverTile) {
+      hoverTile.classList.remove('tile-hover');
+      hoverTile.style.transform = '';
+      hoverTile.style.removeProperty('--mx');
+      hoverTile.style.removeProperty('--my');
+      hoverTile = null;
+    }
+  }
+
+  (function initTileHoverFx() {
+    var grid = document.getElementById('ttGrid');
+    if (!grid) return;
+    grid.addEventListener('mousemove', function (e) {
+      hoverMouseX = e.clientX;
+      hoverMouseY = e.clientY;
+      var tile = e.target && e.target.closest ? e.target.closest('.tile') : null;
+      if (tile !== hoverTile) {
+        clearTileHover();
+        if (tile) {
+          hoverTile = tile;
+          tile.classList.add('tile-hover');
+        }
+      }
+    });
+    grid.addEventListener('mouseleave', clearTileHover);
+  })();
+
   function renderGlowFrame() {
     var i = glowIntensity(Date.now());
+
+    // hoverTile 기울기/스포트라이트 갱신 (호버 중이 아니면 건너뜀)
+    if (hoverTile) {
+      var hr = hoverTile.getBoundingClientRect();
+      if (hr.width > 0 && hr.height > 0) {
+        var hpx = Math.min(1, Math.max(0, (hoverMouseX - hr.left) / hr.width));
+        var hpy = Math.min(1, Math.max(0, (hoverMouseY - hr.top) / hr.height));
+        hoverTile.style.setProperty('--mx', (hpx * 100).toFixed(1) + '%');
+        hoverTile.style.setProperty('--my', (hpy * 100).toFixed(1) + '%');
+        var htRx = (0.5 - hpy) * TILE_MAX_TILT * 2;
+        var htRy = (hpx - 0.5) * TILE_MAX_TILT * 2;
+        hoverTile.style.transform = 'perspective(520px) rotateX(' + htRx.toFixed(2) + 'deg) rotateY(' + htRy.toFixed(2) + 'deg) scale(' + TILE_HOVER_SCALE + ')';
+      }
+    }
 
     var amberBoxOp = lerp(0.45, 0.55, i);
     var amberBlur = lerp(0, 9, i);
